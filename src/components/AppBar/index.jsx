@@ -1,4 +1,4 @@
-import { useState, userState } from 'react'
+import { useState } from 'react'
 import Box from '@mui/system/Box'
 import ModeSelect from '~/components/ModeSelect'
 import AppsIcon from '@mui/icons-material/Apps'
@@ -32,7 +32,8 @@ function AppBar() {
       gap: 2,
       overflowX: 'auto',
       paddingX: 2,
-      bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#2c3e50' : '#1565c0 ')
+      bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#2c3e50' : '#1565c0 '),
+      '&::-webkit-scrollbar-track': { m: 2 }
     }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }} >
         <AppsIcon sx={{ color: 'white' }} />
@@ -59,6 +60,21 @@ function AppBar() {
           value={searchValue}
           size='small'
           onChange={(e) => setSearchValue(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position='start'>
+                <SearchIcon sx={{ color: 'white' }} />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position='end'>
+                <CloseIcon fontSize='small'
+                  sx={{ color: 'white', cursor: 'pointer', display: searchValue ? 'block' : 'none' }}
+                  onClick={() => setSearchValue('')}
+                />
+              </InputAdornment>
+            )
+          }}
           sx={{
             minWidth: '120px',
             maxWidth: '180px',
@@ -71,19 +87,7 @@ function AppBar() {
               '&.Mui-focused fieldset': { borderColor: 'white' }
             }
           }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position='start'>
-                <SearchIcon sx={{ color: 'white' }} />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <CloseIcon fontSize='small'
-                sx={{ color: searchValue ? 'white' : 'transparent', cursor: 'pointer' }}
-                onClick={() => setSearchValue('')}
-              />
-            )
-          }} />
+        />
         <ModeSelect />
         <Tooltip title="Notifications">
           <Badge color="warning" variant="dot" sx={{ cursor: 'pointer' }}>
