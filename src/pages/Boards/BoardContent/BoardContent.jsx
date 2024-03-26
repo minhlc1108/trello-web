@@ -12,9 +12,9 @@ import {
   defaultDropAnimationSideEffects,
   closestCorners,
   pointerWithin,
-  rectIntersection,
-  getFirstCollision,
-  closestCenter
+  // rectIntersection,
+  getFirstCollision
+  // closestCenter
 } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -213,16 +213,20 @@ function BoardContent({ board }) {
     }
 
     const pointerIntersections = pointerWithin(args)
-    const intersections = pointerIntersections.length > 0 ? pointerIntersections : rectIntersection(args)
+    //fix triệt để bug flickering : kéo card có img cover lớn lên phía trên cùng ra khỏi khu vực kéo thả
+    if (!pointerIntersections?.length) return
 
-    let overId = getFirstCollision(intersections, 'id')
+    //thuật toán phát hiện va cham sẽ trả về một mảng các va chạm ở đây
+    // const intersections = pointerIntersections.length > 0 ? pointerIntersections : rectIntersection(args)
+
+    let overId = getFirstCollision(pointerIntersections, 'id')
     if (overId) {
       // nếu overId là column thì sẽ tìm tới cardId gần nhất bên trong khu vực va chạm đó dựa vào thuật toán phát hiện
-      // va chạm closetCenter hoặc closetCorners. tuy nhiên trg hợp này closetCenter mượt hơn
+      // va chạm closetCenter hoặc closetCorners. tuy nhiên trg hợp này closetCorners mượt hơn
       const checkColumn = orderedColumns.find(c => c._id === overId)
       if (checkColumn) {
         // console.log("before", overId)
-        overId = closestCenter({
+        overId = closestCorners({
           ...args,
           droppableContainers: args.droppableContainers.filter(containter => {
             return containter.id !== overId && (checkColumn?.cardOrderIds?.includes(containter.id)) // tim cac container card trong column
