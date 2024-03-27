@@ -18,7 +18,8 @@ import {
 } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { cloneDeep, over } from 'lodash'
+import { cloneDeep, isEmpty } from 'lodash'
+import { generatePlacehoderCard } from '~/utils/formatter'
 
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCards/Card/Card'
@@ -85,9 +86,14 @@ function BoardContent({ board }) {
       const nextActiveColumn = nextColumns.find(column => column._id === activeColumn._id)
       const nextOverColumn = nextColumns.find(column => column._id === overColumn._id)
 
+      // column cũ
       if (nextActiveColumn) {
         nextActiveColumn.cards = nextActiveColumn.cards?.filter(card => card._id !== activeDraggingCardId)
-        // cập nhật lại cardsorderids
+        // thêm Placehoder Card nếu column rỗng : bị kéo hết card đi không còn cái nào nữa
+        if (isEmpty(nextActiveColumn.cards)) {
+          nextActiveColumn.cards = [generatePlacehoderCard(nextActiveColumn)]
+        }
+        // cập nhật lại cardOrderids
         nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id)
       }
 
@@ -100,8 +106,13 @@ function BoardContent({ board }) {
           columnId: overColumn._id
         }
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, rebuild_activeDraggingCardData)
+        // xoá placeholder card nếu đang tồn tại
+        nextOverColumn.cards = nextOverColumn.cards.filter(card => !card.FE_PlaceholderCard)
+        //cập nhật lại cardOrderids
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
       }
+
+      console.log('nextColumns', nextColumns)
       return nextColumns
     })
   }
@@ -232,8 +243,8 @@ function BoardContent({ board }) {
             return containter.id !== overId && (checkColumn?.cardOrderIds?.includes(containter.id)) // tim cac container card trong column
           })
         })[0]?.id
+        // console.log('after', overId)
       }
-      // console.log('after', overId)
 
       lastOverId.current = overId
       return [{ id: overId }]
