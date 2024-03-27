@@ -10,7 +10,7 @@ export const mockData = {
     type: 'public', // 'private'
     ownerIds: [], // Những users là Admin của board
     memberIds: [], // Những users là member bình thường của board
-    columnOrderIds: ['column-id-01', 'column-id-02', 'column-id-03'], // Thứ tự sắp xếp / vị trí của các Columns trong 1 boards
+    columnOrderIds: ['column-id-01', 'column-id-02', 'column-id-03', 'column-id-04'], // Thứ tự sắp xếp / vị trí của các Columns trong 1 boards
     columns: [
       {
         _id: 'column-id-01',
@@ -57,6 +57,23 @@ export const mockData = {
           { _id: 'card-id-11', boardId: 'board-id-01', columnId: 'column-id-03', title: 'Title of card 11', description: null, cover: null, memberIds: [], comments: [], attachments: [] },
           { _id: 'card-id-12', boardId: 'board-id-01', columnId: 'column-id-03', title: 'Title of card 12', description: null, cover: null, memberIds: [], comments: [], attachments: [] },
           { _id: 'card-id-13', boardId: 'board-id-01', columnId: 'column-id-03', title: 'Title of card 13', description: null, cover: null, memberIds: [], comments: [], attachments: [] }
+        ]
+      },
+      {
+        _id: 'column-id-04',
+        boardId: 'board-id-01',
+        title: 'Empty Column 04',
+        /*xử lý bug logic dnd-kit khi column rỗng
+         phía FE sẽ tạo ra card đặc biệt: placehoder Card không liên quan tới backend
+         card đặc biêt này đc ẩn ở UI người dùng
+         Cấu trúc id của những cái card này để unique rất đơn giản, không cần phải làm random phức tạp
+         "columnId-placehoder-card" (mỗi column chỉ có thể có tối đa một cái placehoder Card)
+         *Quan trọng khi tạo: phải đầy đủ: {_id, boardId, columnId,FE_PlacehoderCard }
+         kỹ hơn hơn nữa về cách tạo chuẩn ở bước nào thì học phần tích hợp API backend vào dự án
+         */
+        cardOrderIds: ['column-id-04-placehoder-card'],
+        cards: [
+          { _id: 'column-id-04-placehoder-card', boardId: 'board-id-01', columnId: 'column-id-04', FE_PlaceholderCard: true }
         ]
       }
     ]
