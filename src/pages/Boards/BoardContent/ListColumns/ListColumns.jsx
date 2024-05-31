@@ -8,19 +8,26 @@ import TextField from '@mui/material/TextField'
 import CloseIcon from '@mui/icons-material/Close'
 import { toast } from 'react-toastify'
 
-function ListColumn({ columns }) {
+function ListColumn({ columns, createNewColumn, createNewCard }) {
   const [openNewColumnForm, setOpenNewColumnForm] = useState(false)
   const toggleOpenNewColumnForm = () => setOpenNewColumnForm(!openNewColumnForm)
 
   const [newColumnTitle, setNewColumnTitle] = useState('')
 
-  const addNewColumn = () => {
+  const addNewColumn = async () => {
     if (!newColumnTitle) {
       toast.error('Please enter column title')
       return
     }
 
-    // call API
+    // Tạo dữ liệu column
+    const newColumnData = {
+      title: newColumnTitle
+    }
+
+    // Gọi lên props func createNewColumn ở Boards/_id.jsx
+    // Sau này thay bằng Redux Global Store có thể gọi luôn API ở đây là xong thay vì phải lần lượt gọi lên component cha
+    await createNewColumn(newColumnData)
 
     // đóng trạng thái, clear input
     toggleOpenNewColumnForm()
@@ -41,7 +48,7 @@ function ListColumn({ columns }) {
         overflowY: 'hidden',
         '&::-webkit-scrollbar-track': { m: 2 }
       }}>
-        {columns?.map(column => <Column key={column._id} column={column} />)}
+        {columns?.map(column => <Column key={column._id} column={column} createNewCard={createNewCard}/>)}
 
         {/* Box add new column */}
         {!openNewColumnForm ?
