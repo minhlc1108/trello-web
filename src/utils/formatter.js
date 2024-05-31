@@ -10,7 +10,7 @@ export const capitalizeFirstLetter = (val) => {
          "columnId-placehoder-card" (mỗi column chỉ có thể có tối đa một cái placehoder Card)
          *Quan trọng khi tạo: phải đầy đủ: {_id, boardId, columnId,FE_PlacehoderCard }
 */
-export const generatePlacehoderCard = (column) => {
+export const generatePlaceholderCard = (column) => {
   return {
     _id: `${column._id}-placeholder-card`,
     boardId: column.boardId,

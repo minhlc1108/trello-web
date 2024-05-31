@@ -18,7 +18,7 @@ import { MouseSensor, TouchSensor } from '~/customLibraries/DndKitSensors'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { cloneDeep, isEmpty } from 'lodash'
-import { generatePlacehoderCard } from '~/utils/formatter'
+import { generatePlaceholderCard } from '~/utils/formatter'
 
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCards/Card/Card'
@@ -28,7 +28,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
 }
 
-function BoardContent({ board }) {
+function BoardContent({ board, createNewColumn, createNewCard }) {
   // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
   // Yêu cầu chuột di chuyển 10px thì kích hoạt event (fix click gọi event)
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } })
@@ -90,7 +90,7 @@ function BoardContent({ board }) {
         nextActiveColumn.cards = nextActiveColumn.cards?.filter(card => card._id !== activeDraggingCardId)
         // thêm Placehoder Card nếu column rỗng : bị kéo hết card đi không còn cái nào nữa
         if (isEmpty(nextActiveColumn.cards)) {
-          nextActiveColumn.cards = [generatePlacehoderCard(nextActiveColumn)]
+          nextActiveColumn.cards = [generatePlaceholderCard(nextActiveColumn)]
         }
         // cập nhật lại cardOrderids
         nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id)
@@ -272,7 +272,7 @@ function BoardContent({ board }) {
         height: (theme) => theme.trello.boardContentHeight,
         padding: '10px 0'
       }}>
-        <ListColumns columns={orderedColumns} />
+        <ListColumns columns={orderedColumns} createNewColumn={createNewColumn} createNewCard={createNewCard} />
         <DragOverlay dropAnimation={customDropAnimation}>
           {!activeDragItemType && null}
           {(activeDragItemType == ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column={activeDragItemData}></Column>}
