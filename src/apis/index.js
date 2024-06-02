@@ -16,12 +16,31 @@ export const fetchBoardDetailsAPI = async (boardId) => {
   return respone.data
 }
 
+export const updateBoardDetailsAPI = async (boardId, updateData) => {
+  const respone = await axios.put(`${API_ROOT}/v1/boards/${boardId}`, updateData)
+  //axios trả kq về property data
+  return respone.data
+}
+
+export const moveCardToDifferenceColumnAPI = async (updateData) => {
+  const respone = await axios.put(`${API_ROOT}/v1/boards/supports/move_card`, updateData)
+  //axios trả kq về property data
+  return respone.data
+}
+
 // Column API
 export const createNewColumnAPI = async (newColumnData) => {
   const respone = await axios.post(`${API_ROOT}/v1/columns`, newColumnData)
 
   return respone.data
 }
+
+export const updateColumnDetailsAPI = async (boardId, updateData) => {
+  const respone = await axios.put(`${API_ROOT}/v1/columns/${boardId}`, updateData)
+  //axios trả kq về property data
+  return respone.data
+}
+
 
 // Card API
 export const createNewCardAPI = async (newCardData) => {
