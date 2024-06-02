@@ -14,7 +14,7 @@ function ListColumn({ columns, createNewColumn, createNewCard }) {
 
   const [newColumnTitle, setNewColumnTitle] = useState('')
 
-  const addNewColumn = async () => {
+  const addNewColumn = () => {
     if (!newColumnTitle) {
       toast.error('Please enter column title')
       return
@@ -27,7 +27,7 @@ function ListColumn({ columns, createNewColumn, createNewCard }) {
 
     // Gọi lên props func createNewColumn ở Boards/_id.jsx
     // Sau này thay bằng Redux Global Store có thể gọi luôn API ở đây là xong thay vì phải lần lượt gọi lên component cha
-    await createNewColumn(newColumnData)
+    createNewColumn(newColumnData)
 
     // đóng trạng thái, clear input
     toggleOpenNewColumnForm()

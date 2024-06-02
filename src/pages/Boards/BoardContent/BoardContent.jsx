@@ -1,6 +1,5 @@
 import Box from '@mui/system/Box'
 import ListColumns from './ListColumns/ListColumns'
-import { mapOrder } from '~/utils/sorts'
 import {
   DndContext,
   // PointerSensor,
@@ -28,7 +27,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
 }
 
-function BoardContent({ board, createNewColumn, createNewCard }) {
+function BoardContent({ board, createNewColumn, createNewCard, moveColumns, moveCardInTheSameColumn, moveCardToDifferenceColumn }) {
   // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
   // Yêu cầu chuột di chuyển 10px thì kích hoạt event (fix click gọi event)
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } })
@@ -50,7 +49,8 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
 
 
   useEffect(() => {
-    setOrderedColumns(mapOrder(board?.columns, board?.columnOrderIds, '_id'))
+    // column đã được sắp xếp ở Board/_id.jsx
+    setOrderedColumns(board.columns)
   }, [board])
 
   const findColumnById = (cardId) => {
@@ -64,7 +64,8 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
     over,
     activeColumn,
     activeDraggingCardId,
-    activeDraggingCardData
+    activeDraggingCardData,
+    triggerMethod
   ) => {
     setOrderedColumns(prevColumns => {
       // tìm vị trí card trong column
@@ -111,7 +112,15 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
       }
 
-      // console.log('nextColumns', nextColumns)
+      if (triggerMethod === 'handleDragEnd') {
+        moveCardToDifferenceColumn(
+          activeDraggingCardId,
+          oldColumnWhenDraggingCard._id,
+          nextOverColumn._id,
+          nextColumns
+        )
+      }
+
       return nextColumns
     })
   }
@@ -149,7 +158,8 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
         over,
         activeColumn,
         activeDraggingCardId,
-        activeDraggingCardData)
+        activeDraggingCardData,
+        'handleDragOver')
     }
   }
 
@@ -179,21 +189,25 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
           over,
           activeColumn,
           activeDraggingCardId,
-          activeDraggingCardData)
+          activeDraggingCardData,
+          'handleDragEnd')
       } else {
         // xử lý kéo thả card trong cùng 1 column
         const oldCardIndex = oldColumnWhenDraggingCard?.cards.findIndex(c => c._id === activeDragItemId)
         const newCardIndex = overColumn?.cards.findIndex(c => c._id === overCardId)
         const dndOrderedCards = arrayMove(oldColumnWhenDraggingCard?.cards, oldCardIndex, newCardIndex)
-
+        const dndOrderedCardIds = dndOrderedCards.map(c => c._id)
+        //gọi update state để tránh delay hoặc flickering lúc kéo thả cần chờ gọi api
         setOrderedColumns(prevColumns => {
           const nextColumns = cloneDeep(prevColumns)
           const targetColumn = nextColumns.find(c => c._id === overColumn._id)
           // update lại data column có card đang kéo thả
           targetColumn.cards = dndOrderedCards
-          targetColumn.cardOrderIds = dndOrderedCards.map(c => c._id)
+          targetColumn.cardOrderIds = dndOrderedCardIds
           return nextColumns
         })
+        //tạm thời gọi hàm prop của Boards/_id.jsx để cập nhật board sau này dùng redux thay thế
+        moveCardInTheSameColumn(dndOrderedCards, dndOrderedCardIds, oldColumnWhenDraggingCard._id)
       }
     }
 
@@ -202,10 +216,11 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
         const oldColumnIndex = orderedColumns.findIndex(c => c._id === active.id)
         const newColumnIndex = orderedColumns.findIndex(c => c._id === over.id)
         const dndOrderedColumns = arrayMove(orderedColumns, oldColumnIndex, newColumnIndex)
-
-        // const dndOrderedColumnsIds = dndOrderedColumns.map(c => c._id)
-        // sau nay sd call api
+        // vẫn gọi update state để tránh delay hoặc flickering lúc kéo thả cần chờ gọi api
         setOrderedColumns(dndOrderedColumns)
+
+        //tạm thời gọi hàm prop của Boards/_id.jsx để cập nhật board sau này dùng redux thay thế
+        moveColumns(dndOrderedColumns)
       }
     }
 
