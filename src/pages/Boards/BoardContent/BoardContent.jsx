@@ -173,10 +173,10 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumns, move
       const { id: activeDraggingCardId, data: { current: activeDraggingCardData } } = active
       // card đang tương tác (trên hoặc dưới so với card được kéo ở trên)
       const { id: overCardId } = over
-
       // tìm 2 column tương ứng theo cardId
       const activeColumn = findColumnById(activeDraggingCardId)
-      const overColumn = findColumnById(overCardId)
+      // ở dragover đã xóa card placeholder ở orderedColumn rồi nên k thấy placeholder card trong đó sẽ k tìm đc column over
+      const overColumn = findColumnById(overCardId) || overCardId.includes('placeholder-card') ? activeColumn : undefined
 
       if (!activeColumn || !overColumn) return
 
