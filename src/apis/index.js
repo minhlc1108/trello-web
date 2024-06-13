@@ -35,13 +35,17 @@ export const createNewColumnAPI = async (newColumnData) => {
   return respone.data
 }
 
-export const updateColumnDetailsAPI = async (boardId, updateData) => {
-  const respone = await axios.put(`${API_ROOT}/v1/columns/${boardId}`, updateData)
+export const updateColumnDetailsAPI = async (columnId, updateData) => {
+  const respone = await axios.put(`${API_ROOT}/v1/columns/${columnId}`, updateData)
   //axios trả kq về property data
   return respone.data
 }
 
-
+export const deleteColumnDetailsAPI = async (columnId) => {
+  const respone = await axios.delete(`${API_ROOT}/v1/columns/${columnId}`)
+  //axios trả kq về property data
+  return respone.data
+}
 // Card API
 export const createNewCardAPI = async (newCardData) => {
   const respone = await axios.post(`${API_ROOT}/v1/cards`, newCardData)

@@ -9,7 +9,8 @@ import {
   createNewColumnAPI,
   updateColumnDetailsAPI,
   createNewCardAPI,
-  moveCardToDifferenceColumnAPI
+  moveCardToDifferenceColumnAPI,
+  deleteColumnDetailsAPI
 } from '~/apis'
 import { generatePlaceholderCard } from '~/utils/formatter'
 import { isEmpty } from 'lodash'
@@ -17,6 +18,8 @@ import { mapOrder } from '~/utils/sorts'
 import CircularProgress from '@mui/material/CircularProgress'
 import Box from '@mui/material/Box'
 import { Typography } from '@mui/material'
+import { toast } from 'react-toastify'
+
 
 // import { mockData } from '~/apis/mock-data'
 function Board() {
@@ -90,6 +93,17 @@ function Board() {
     updateBoardDetailsAPI(newBoard._id, { columnOrderIds: dndOrderedColumnIds })
   }
 
+  const deleteColumnDetails = async (columnId) => {
+    const newBoard = { ...board }
+    newBoard.columns = newBoard.columns.filter(c => c._id !== columnId)
+    newBoard.columnOrderIds = newBoard.columnOrderIds.filter(id => id !== columnId)
+    setBoard(newBoard)
+
+    deleteColumnDetailsAPI(columnId).then(res => {
+      toast.success(res?.deleteResult)
+    })
+
+  }
   // Khi kéo thả card trong cùng column chỉ cần gọi API cập nhật lại cardOrderIds của column chứa nó
   const moveCardInTheSameColumn = (dndOrderedCards, dndOrderedCardIds, columnId) => {
     const newBoard = { ...board }
@@ -149,7 +163,8 @@ function Board() {
           createNewCard={createNewCard}
           moveColumns={moveColumns}
           moveCardInTheSameColumn={moveCardInTheSameColumn}
-          moveCardToDifferenceColumn={moveCardToDifferenceColumn} />
+          moveCardToDifferenceColumn={moveCardToDifferenceColumn}
+          deleteColumnDetails={deleteColumnDetails} />
       </Container >
     )
 
