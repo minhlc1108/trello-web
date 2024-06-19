@@ -21,18 +21,17 @@ import { generatePlaceholderCard } from '~/utils/formatter'
 
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCards/Card/Card'
+import { useDispatch } from 'react-redux'
+import { moveColumn, updateColumns } from '~/redux/slices/boardSlice'
+import { moveCardToDifferenceColumnAPI, updateBoardDetailsAPI, updateColumnDetailsAPI } from '~/apis'
 
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
 }
 
-function BoardContent({ board,
-  createNewColumn,
-  createNewCard, moveColumns,
-  moveCardInTheSameColumn,
-  moveCardToDifferenceColumn, 
-  deleteColumnDetails }) {
+function BoardContent({ board }) {
+  const dispatch = useDispatch()
   // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
   // Yêu cầu chuột di chuyển 10px thì kích hoạt event (fix click gọi event)
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } })
@@ -90,7 +89,6 @@ function BoardContent({ board,
 
       const nextActiveColumn = nextColumns.find(column => column._id === activeColumn._id)
       const nextOverColumn = nextColumns.find(column => column._id === overColumn._id)
-
       // column cũ
       if (nextActiveColumn) {
         nextActiveColumn.cards = nextActiveColumn.cards?.filter(card => card._id !== activeDraggingCardId)
@@ -118,14 +116,19 @@ function BoardContent({ board,
       }
 
       if (triggerMethod === 'handleDragEnd') {
-        moveCardToDifferenceColumn(
-          activeDraggingCardId,
-          oldColumnWhenDraggingCard._id,
-          nextOverColumn._id,
-          nextColumns
-        )
-      }
+        dispatch(updateColumns(nextColumns))
 
+        let prevCardOrderIds = nextColumns.find(column => column._id === activeColumn._id)?.cardOrderIds
+        // không đẩy card placeholder lên cho BE
+        if (prevCardOrderIds[0].includes('placeholder-card')) prevCardOrderIds = []
+        moveCardToDifferenceColumnAPI({
+          cardId: activeDraggingCardId,
+          prevColumnId: oldColumnWhenDraggingCard._id,
+          prevCardOrderIds,
+          nextColumnId: nextOverColumn._id,
+          nextCardOrderIds: nextColumns.find(column => column._id === nextOverColumn._id)?.cardOrderIds
+        })
+      }
       return nextColumns
     })
   }
@@ -209,10 +212,10 @@ function BoardContent({ board,
           // update lại data column có card đang kéo thả
           targetColumn.cards = dndOrderedCards
           targetColumn.cardOrderIds = dndOrderedCardIds
+          dispatch(updateColumns(nextColumns))
           return nextColumns
         })
-        //tạm thời gọi hàm prop của Boards/_id.jsx để cập nhật board sau này dùng redux thay thế
-        moveCardInTheSameColumn(dndOrderedCards, dndOrderedCardIds, oldColumnWhenDraggingCard._id)
+        updateColumnDetailsAPI(overColumn._id, { cardOrderIds: dndOrderedCardIds })
       }
     }
 
@@ -224,8 +227,10 @@ function BoardContent({ board,
         // vẫn gọi update state để tránh delay hoặc flickering lúc kéo thả cần chờ gọi api
         setOrderedColumns(dndOrderedColumns)
 
-        //tạm thời gọi hàm prop của Boards/_id.jsx để cập nhật board sau này dùng redux thay thế
-        moveColumns(dndOrderedColumns)
+        const orderedColumnOrderIds = dndOrderedColumns.map(c => c._id)
+        dispatch(moveColumn({ columns: dndOrderedColumns, columnOrderIds: orderedColumnOrderIds }))
+        // call api
+        updateBoardDetailsAPI(board._id, { columnOrderIds: orderedColumnOrderIds })
       }
     }
 
@@ -292,11 +297,11 @@ function BoardContent({ board,
         height: (theme) => theme.trello.boardContentHeight,
         padding: '10px 0'
       }}>
-        <ListColumns columns={orderedColumns} createNewColumn={createNewColumn} createNewCard={createNewCard} deleteColumnDetails={deleteColumnDetails}/>
+        <ListColumns columns={orderedColumns} />
         <DragOverlay dropAnimation={customDropAnimation}>
           {!activeDragItemType && null}
-          {(activeDragItemType == ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column={activeDragItemData}></Column>}
-          {(activeDragItemType == ACTIVE_DRAG_ITEM_TYPE.CARD) && <Card card={activeDragItemData}></Card>}
+          {(activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column={activeDragItemData}></Column>}
+          {(activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD) && <Card card={activeDragItemData}></Card>}
         </DragOverlay>
       </Box>
     </DndContext>

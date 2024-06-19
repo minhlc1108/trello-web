@@ -24,8 +24,12 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { toast } from 'react-toastify'
 import { useConfirm } from 'material-ui-confirm'
+import { createNewCardAPI, deleteColumnDetailsAPI } from '~/apis'
+import { useDispatch } from 'react-redux'
+import { addCard, deleteColumn } from '~/redux/slices/boardSlice'
 
-function Column({ column, createNewCard, deleteColumnDetails }) {
+function Column({ column }) {
+  const dispatch = useDispatch()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column._id,
     data: { ...column }
@@ -63,7 +67,7 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
 
   const [newCardTitle, setNewCardTitle] = useState('')
 
-  const addNewCard = () => {
+  const addNewCard = async () => {
     if (!newCardTitle) {
       toast.error('Please enter card title', { position: 'bottom-right' })
       return
@@ -71,13 +75,19 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
 
     const newCardData = {
       title: newCardTitle,
-      columnId: column._id
+      columnId: column._id,
+      boardId: column.boardId
     }
 
-    createNewCard(newCardData)
     // đóng trạng thái, clear input
     toggleOpenNewCardForm()
     setNewCardTitle('')
+
+    const createdCard = await createNewCardAPI({
+      ...newCardData
+    })
+
+    dispatch(addCard(createdCard))
   }
 
   const removeColumn = () => {
@@ -87,7 +97,10 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
       description: 'This action will delete column and its cards! Are you sure?'
     })
       .then(() => {
-        deleteColumnDetails(column._id)
+        dispatch(deleteColumn(column._id))
+        deleteColumnDetailsAPI(column._id).then(res => {
+          toast.success(res?.deleteResult)
+        })
       })
       .catch(() => { })
   }
@@ -152,7 +165,7 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
                   }
                 }
               }}
-                onClick={() => setOpenNewCardForm(true)}
+              onClick={() => setOpenNewCardForm(true)}
               >
                 <ListItemIcon><AddCardIcon className='add-card-icon' fontSize="small" /></ListItemIcon>
                 <ListItemText>Add new card</ListItemText>
@@ -178,7 +191,7 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
                   }
                 }
               }}
-                onClick={removeColumn}
+              onClick={removeColumn}
               >
                 <ListItemIcon><DeleteForeverIcon className='delete-forever-icon' fontSize="small" /></ListItemIcon>
                 <ListItemText>Remove this column</ListItemText>
