@@ -19,67 +19,75 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Box from '@mui/material/Box'
 import { Typography } from '@mui/material'
 import { toast } from 'react-toastify'
-
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchBoard } from '~/redux/slices/boardSlice'
 
 // import { mockData } from '~/apis/mock-data'
 function Board() {
+  const dispatch = useDispatch()
+  const isLoading = useSelector(state => state.board.isLoading)
+  const boardRedux = useSelector(state => state.board.data)
   const [board, setBoard] = useState(null)
 
+  console.log(boardRedux)
   useEffect(() => {
-    // tạm thời fix cứng boardId, sau dùng react-router-dom để lấy boardId từ Url về
-    const boardId = '6658b2bbefe6fa78ac4369d0'
-    // Call API
-    fetchBoardDetailsAPI(boardId).then((board) => {
-      board.columns = mapOrder(board.columns, board.columnOrderIds, '_id')
-      board.columns.forEach(column => {
-        if (isEmpty(column.cards)) {
-          // nếu column không có card tạo card placeholder để có thể kéo thả card
-          column.cards = [generatePlaceholderCard(column)]
-          column.cardOrderIds = [generatePlaceholderCard(column)._id]
-        } else {
-          column.cards = mapOrder(column.cards, column.cardOrderIds, '_id')
-        }
-      })
-      setBoard(board)
-    })
-  }, [])
+    dispatch(fetchBoard('6658b2bbefe6fa78ac4369d0'))
+  }, [dispatch])
+  // useEffect(() => {
+  //   // tạm thời fix cứng boardId, sau dùng react-router-dom để lấy boardId từ Url về
+  //   const boardId = '6658b2bbefe6fa78ac4369d0'
+  //   // Call API
+  //   fetchBoardDetailsAPI(boardId).then((board) => {
+  //     board.columns = mapOrder(board.columns, board.columnOrderIds, '_id')
+  //     board.columns.forEach(column => {
+  //       if (isEmpty(column.cards)) {
+  //         // nếu column không có card tạo card placeholder để có thể kéo thả card
+  //         column.cards = [generatePlaceholderCard(column)]
+  //         column.cardOrderIds = [generatePlaceholderCard(column)._id]
+  //       } else {
+  //         column.cards = mapOrder(column.cards, column.cardOrderIds, '_id')
+  //       }
+  //     })
+  //     setBoard(board)
+  //   })
+  // }, [])
 
-  const createNewColumn = async (newColumnData) => {
-    const createdColumn = await createNewColumnAPI({
-      ...newColumnData,
-      boardId: board._id
-    })
+  // const createNewColumn = async (newColumnData) => {
+  //   const createdColumn = await createNewColumnAPI({
+  //     ...newColumnData,
+  //     boardId: board._id
+  //   })
 
-    // khi tạo column mới chưa có card cần có 1 placeholder card để xử lý kéo thả
-    createdColumn.cards = [generatePlaceholderCard(createdColumn)]
-    createdColumn.cardOrderIds = [generatePlaceholderCard(createdColumn)._id]
-    // cập nhật state board
-    const newBoard = { ...board }
-    newBoard.columns.push(createdColumn)
-    newBoard.columnOrderIds.push(createdColumn._id)
-    setBoard(newBoard)
-  }
+  //   // khi tạo column mới chưa có card cần có 1 placeholder card để xử lý kéo thả
+  //   createdColumn.cards = [generatePlaceholderCard(createdColumn)]
+  //   createdColumn.cardOrderIds = [generatePlaceholderCard(createdColumn)._id]
+  //   // cập nhật state board
+  //   const newBoard = { ...board }
+  //   newBoard.columns.push(createdColumn)
+  //   newBoard.columnOrderIds.push(createdColumn._id)
+  //   setBoard(newBoard)
+  // }
 
-  const createNewCard = async (newCardData) => {
-    const createdCard = await createNewCardAPI({
-      ...newCardData,
-      boardId: board._id
-    })
+  // const createNewCard = async (newCardData) => {
+  //   const createdCard = await createNewCardAPI({
+  //     ...newCardData,
+  //     boardId: board._id
+  //   })
 
-    // cập nhật state board
-    const newBoard = { ...board }
-    const columnToUpdate = newBoard.columns.find(column => column._id === createdCard.columnId)
+  //   // cập nhật state board
+  //   const newBoard = { ...board }
+  //   const columnToUpdate = newBoard.columns.find(column => column._id === createdCard.columnId)
 
-    if (columnToUpdate.cards.some(card => card.FE_PlaceholderCard)) {
-      // xóa card placeholder
-      columnToUpdate.cards = [createdCard]
-      columnToUpdate.cardOrderIds = [createdCard._id]
-    } else {
-      columnToUpdate.cards.push(createdCard)
-      columnToUpdate.cardOrderIds.push(createdCard._id)
-    }
-    setBoard(newBoard)
-  }
+  //   if (columnToUpdate.cards.some(card => card.FE_PlaceholderCard)) {
+  //     // xóa card placeholder
+  //     columnToUpdate.cards = [createdCard]
+  //     columnToUpdate.cardOrderIds = [createdCard._id]
+  //   } else {
+  //     columnToUpdate.cards.push(createdCard)
+  //     columnToUpdate.cardOrderIds.push(createdCard._id)
+  //   }
+  //   setBoard(newBoard)
+  // }
 
   const moveColumns = (dndOrderedColumns) => {
     const dndOrderedColumnIds = dndOrderedColumns.map(c => c._id)
@@ -145,7 +153,7 @@ function Board() {
 
   }
 
-  if (!board) {
+  if (isLoading) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw', gap: 2 }}>
         <CircularProgress />
@@ -156,11 +164,9 @@ function Board() {
     return (
       <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
         <AppBar />
-        <BoardBar board={board} />
+        <BoardBar board={boardRedux} />
         <BoardContent
-          board={board}
-          createNewColumn={createNewColumn}
-          createNewCard={createNewCard}
+          board={boardRedux}
           moveColumns={moveColumns}
           moveCardInTheSameColumn={moveCardInTheSameColumn}
           moveCardToDifferenceColumn={moveCardToDifferenceColumn}

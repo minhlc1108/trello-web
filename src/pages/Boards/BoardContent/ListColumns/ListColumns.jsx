@@ -7,14 +7,20 @@ import { useState } from 'react'
 import TextField from '@mui/material/TextField'
 import CloseIcon from '@mui/icons-material/Close'
 import { toast } from 'react-toastify'
+import { createNewColumnAPI } from '~/apis'
+import { useDispatch, useSelector } from 'react-redux'
+import { addColumn } from '~/redux/slices/boardSlice'
 
-function ListColumn({ columns, createNewColumn, createNewCard, deleteColumnDetails }) {
+function ListColumn({ columns, deleteColumnDetails }) {
+  const dispatch = useDispatch()
+  const boardId = useSelector(state => state.board.data._id)
+
   const [openNewColumnForm, setOpenNewColumnForm] = useState(false)
   const toggleOpenNewColumnForm = () => setOpenNewColumnForm(!openNewColumnForm)
 
   const [newColumnTitle, setNewColumnTitle] = useState('')
 
-  const addNewColumn = () => {
+  const addNewColumn = async () => {
     if (!newColumnTitle) {
       toast.error('Please enter column title')
       return
@@ -25,13 +31,18 @@ function ListColumn({ columns, createNewColumn, createNewCard, deleteColumnDetai
       title: newColumnTitle
     }
 
-    // Gọi lên props func createNewColumn ở Boards/_id.jsx
-    // Sau này thay bằng Redux Global Store có thể gọi luôn API ở đây là xong thay vì phải lần lượt gọi lên component cha
-    createNewColumn(newColumnData)
-
     // đóng trạng thái, clear input
     toggleOpenNewColumnForm()
     setNewColumnTitle('')
+    // Gọi lên props func createNewColumn ở Boards/_id.jsx
+    // Sau này thay bằng Redux Global Store có thể gọi luôn API ở đây là xong thay vì phải lần lượt gọi lên component cha
+    // createNewColumn(newColumnData)
+    const createdColumn = await createNewColumnAPI({
+      ...newColumnData,
+      boardId: boardId
+    })
+
+    dispatch(addColumn(createdColumn))
   }
   // sortable context requires that you pass it the sorted array of the unique identifiers associated to each sortable item via the items prop.
   //  This array should look like ["1", "2", "3"], not [{id: "1"}, {id: "2}, {id: "3}].
@@ -48,7 +59,7 @@ function ListColumn({ columns, createNewColumn, createNewCard, deleteColumnDetai
         overflowY: 'hidden',
         '&::-webkit-scrollbar-track': { m: 2 }
       }}>
-        {columns?.map(column => <Column key={column._id} column={column} createNewCard={createNewCard} deleteColumnDetails={deleteColumnDetails}/>)}
+        {columns?.map(column => <Column key={column._id} column={column} deleteColumnDetails={deleteColumnDetails} />)}
 
         {/* Box add new column */}
         {!openNewColumnForm ?

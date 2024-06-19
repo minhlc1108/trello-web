@@ -7,6 +7,8 @@ import theme from '~/theme'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { ConfirmProvider } from 'material-ui-confirm'
+import { Provider } from 'react-redux'
+import store from '~/redux/store'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   // <React.StrictMode>
@@ -18,7 +20,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       buttonOrder: ['confirm', 'cancel']
     }}>
       <CssBaseline />
-      <App />
+      <Provider store={store}>
+        <App />
+      </Provider>
       <ToastContainer position="bottom-left" theme="colored" />
     </ConfirmProvider>
   </CssVarsProvider>
