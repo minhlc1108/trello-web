@@ -11,7 +11,7 @@ import { createNewColumnAPI } from '~/apis'
 import { useDispatch, useSelector } from 'react-redux'
 import { addColumn } from '~/redux/slices/boardSlice'
 
-function ListColumn({ columns, deleteColumnDetails }) {
+function ListColumn({ columns }) {
   const dispatch = useDispatch()
   const boardId = useSelector(state => state.board.data._id)
 
@@ -59,7 +59,7 @@ function ListColumn({ columns, deleteColumnDetails }) {
         overflowY: 'hidden',
         '&::-webkit-scrollbar-track': { m: 2 }
       }}>
-        {columns?.map(column => <Column key={column._id} column={column} deleteColumnDetails={deleteColumnDetails} />)}
+        {columns?.map(column => <Column key={column._id} column={column} />)}
 
         {/* Box add new column */}
         {!openNewColumnForm ?

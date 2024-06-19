@@ -24,11 +24,11 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { toast } from 'react-toastify'
 import { useConfirm } from 'material-ui-confirm'
-import { createNewCardAPI } from '~/apis'
+import { createNewCardAPI, deleteColumnDetailsAPI } from '~/apis'
 import { useDispatch } from 'react-redux'
-import { addCard } from '~/redux/slices/boardSlice'
+import { addCard, deleteColumn } from '~/redux/slices/boardSlice'
 
-function Column({ column, deleteColumnDetails }) {
+function Column({ column }) {
   const dispatch = useDispatch()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column._id,
@@ -97,7 +97,10 @@ function Column({ column, deleteColumnDetails }) {
       description: 'This action will delete column and its cards! Are you sure?'
     })
       .then(() => {
-        deleteColumnDetails(column._id)
+        dispatch(deleteColumn(column._id))
+        deleteColumnDetailsAPI(column._id).then(res => {
+          toast.success(res?.deleteResult)
+        })
       })
       .catch(() => { })
   }
@@ -162,7 +165,7 @@ function Column({ column, deleteColumnDetails }) {
                   }
                 }
               }}
-                onClick={() => setOpenNewCardForm(true)}
+              onClick={() => setOpenNewCardForm(true)}
               >
                 <ListItemIcon><AddCardIcon className='add-card-icon' fontSize="small" /></ListItemIcon>
                 <ListItemText>Add new card</ListItemText>
@@ -188,7 +191,7 @@ function Column({ column, deleteColumnDetails }) {
                   }
                 }
               }}
-                onClick={removeColumn}
+              onClick={removeColumn}
               >
                 <ListItemIcon><DeleteForeverIcon className='delete-forever-icon' fontSize="small" /></ListItemIcon>
                 <ListItemText>Remove this column</ListItemText>

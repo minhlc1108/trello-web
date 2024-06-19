@@ -4,8 +4,6 @@ import { isEmpty } from 'lodash'
 import { mapOrder } from '~/utils/sorts'
 import { generatePlaceholderCard } from '~/utils/formatter'
 
-// const boardId = '6658b2bbefe6fa78ac4369d0'
-
 export const fetchBoard = createAsyncThunk('boards/fetchBoard', async (boardId) => {
   return await fetchBoardDetailsAPI(boardId).then((board) => {
     board.columns = mapOrder(board.columns, board.columnOrderIds, '_id')
@@ -39,6 +37,17 @@ export const boardSlice = createSlice({
       state.data.columns.push(column)
       state.data.columnOrderIds.push(column._id)
     },
+    moveColumn: (state, action) => {
+      state.data.columns = action.payload.columns
+      state.data.columnOrderIds = action.payload.columnOrderIds
+    },
+    deleteColumn: (state, action) => {
+      state.data.columns = state.data.columns.filter(c => c._id !== action.payload)
+      state.data.columnOrderIds = state.data.columnOrderIds.filter(c => c._id !== action.payload)
+    },
+    updateColumns: (state, action) => {
+      state.data.columns = action.payload
+    },
     addCard: (state, action) => {
       const createdCard = action.payload
       const columnToUpdate = state.data.columns.find(column => column._id === createdCard.columnId)
@@ -63,10 +72,10 @@ export const boardSlice = createSlice({
         state.data = action.payload
       })
       .addCase(fetchBoard.rejected, (state, action) => {
-        state.isLoading = false
+        state.isLoading = true
         state.error = action.payload
       })
   }
 })
 
-export const { addColumn, addCard } = boardSlice.actions
+export const { addColumn, moveColumn, addCard, updateColumns, deleteColumn } = boardSlice.actions
