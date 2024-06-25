@@ -8,16 +8,18 @@ import Box from '@mui/material/Box'
 import { Typography } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchBoard } from '~/redux/slices/boardSlice'
+import { useParams } from 'react-router-dom'
 
 // import { mockData } from '~/apis/mock-data'
 function Board() {
   const dispatch = useDispatch()
+  const { boardId } = useParams()
   const isLoading = useSelector(state => state.board.isLoading)
   const board = useSelector(state => state.board.data)
-
+  // 6658b2bbefe6fa78ac4369d0
   useEffect(() => {
-    dispatch(fetchBoard('6658b2bbefe6fa78ac4369d0'))
-  }, [dispatch])
+    dispatch(fetchBoard(boardId))
+  }, [dispatch, boardId])
 
   if (isLoading) {
     return (
