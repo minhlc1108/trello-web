@@ -35,18 +35,13 @@ function Login() {
             <SvgIcon component={TrelloIcon} inheritViewBox sx={{ width: '100%', height: '40px' }} />
             <Typography variant='h6'>Login</Typography>
           </Box>
-          <form style={{ display: 'flex', flexDirection: 'column', gap: '15px' }} onSubmit={handleSubmit((data) => console.log(data))}>
-            <Box>
-              <TextField sx={{ width: '100%' }} label="Email" {...register('email', { required: 'This input is required' })} error={errors.email ? true : false} />
-              {errors.email && <Alert sx={{ marginTop: '5px' }} severity="error">{errors.email.message}</Alert>}
-            </Box>
-            <Box>
-              <TextField sx={{ width: '100%' }} type='password' label="Password" autoComplete='on' {...register('password', { required: 'This input is required' })} error={errors.password ? true : false} />
-              {errors.password && <Alert sx={{ marginTop: '5px' }} severity="error">{errors.password.message}</Alert>}
-            </Box>
-            <Button sx={{ marginTop: '10px' }} type='submit' variant='contained' size='large'>Login</Button>
+          <form onSubmit={handleSubmit((data) => console.log(data))}>
+            <TextField margin='dense' fullWidth label="Email" {...register('email', { required: 'This input is required' })} error={errors.email ? true : false} />
+            {errors.email && <Alert severity="error">{errors.email.message}</Alert>}
+            <TextField margin='dense' fullWidth type='password' label="Password" autoComplete='on' {...register('password', { required: 'This input is required' })} error={errors.password ? true : false} />
+            {errors.password && <Alert severity="error">{errors.password.message}</Alert>}
+            <Button sx={{ marginTop: '10px', width: '100%' }} type='submit' variant='contained' size='large'>Login</Button>
           </form>
-
           <Link to='/register' style={{ marginTop: '10px', textDecoration: 'none', textAlign: 'center', color: '#1976d2' }}>Create new account</Link>
         </Box>
       </Box >
