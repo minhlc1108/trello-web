@@ -165,7 +165,7 @@ function Column({ column }) {
                   }
                 }
               }}
-              onClick={() => setOpenNewCardForm(true)}
+                onClick={() => setOpenNewCardForm(true)}
               >
                 <ListItemIcon><AddCardIcon className='add-card-icon' fontSize="small" /></ListItemIcon>
                 <ListItemText>Add new card</ListItemText>
@@ -191,7 +191,7 @@ function Column({ column }) {
                   }
                 }
               }}
-              onClick={removeColumn}
+                onClick={removeColumn}
               >
                 <ListItemIcon><DeleteForeverIcon className='delete-forever-icon' fontSize="small" /></ListItemIcon>
                 <ListItemText>Remove this column</ListItemText>
