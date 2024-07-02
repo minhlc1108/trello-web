@@ -1,9 +1,34 @@
 import { Box, Button, Container, Alert, SvgIcon, TextField, Typography } from '@mui/material'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, createSearchParams, useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { createNewUserAPI } from '~/apis'
 import { ReactComponent as TrelloIcon } from '~/assets/trello.svg'
 function Register() {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm()
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting, isSubmitSuccessful } } = useForm({})
+  const navigate = useNavigate()
+  const handleSignUp = async (data) => {
+    await toast.promise(createNewUserAPI({ email: data.email, password: data.password }), {
+      pending: 'Register is in progress',
+      success: {
+        render: ({ data }) => {
+          navigate({
+            pathname: '/login',
+            search: createSearchParams({
+              registeredEmail: data.email
+            }).toString()
+          })
+          return data.message
+        }
+      },
+      error: {
+        render: ({ data }) => {
+          return data.response.data.message || data.message
+        }
+      }
+    })
+  }
+
   return (
     <Container disableGutters maxWidth={false}
       sx={{
@@ -35,7 +60,7 @@ function Register() {
             <SvgIcon component={TrelloIcon} inheritViewBox sx={{ width: '100%', height: '40px' }} />
             <Typography variant='h6'>Register</Typography>
           </Box>
-          <form onSubmit={handleSubmit((data) => console.log(data))}>
+          <form onSubmit={handleSubmit(handleSignUp)}>
             <TextField margin='dense' fullWidth label="Email" {...register('email', {
               required: 'This input is required',
               pattern: {
@@ -60,9 +85,8 @@ function Register() {
               }
             })} error={errors.cfpassword ? true : false} />
             {errors.cfpassword && <Alert severity="error">{errors.cfpassword.message}</Alert>}
-            <Button sx={{ marginTop: '10px', width: '100%' }} type='submit' variant='contained' size='large'>Sign up</Button>
+            <Button disabled={isSubmitting} sx={{ marginTop: '10px', width: '100%' }} type='submit' variant='contained' size='large'>Sign up</Button>
           </form>
-
           <Link to='/login' style={{ marginTop: '10px', textDecoration: 'none', textAlign: 'center', color: '#1976d2' }}>You already have account? Log in</Link>
         </Box>
       </Box >

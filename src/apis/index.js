@@ -66,3 +66,19 @@ export const createNewCardAPI = async (newCardData) => {
   const respone = await axiosInstance.post(`${API_ROOT}/v1/cards`, newCardData)
   return respone.data
 }
+
+// User API
+export const createNewUserAPI = async (newUserData) => {
+  const respone = await axios.post(`${API_ROOT}/v1/users`, newUserData)
+  return respone.data
+}
+
+export const fetchUserAPI = async (email) => {
+  const respone = await axiosInstance.get(`${API_ROOT}/v1/users/${email}`)
+  return respone.data
+}
+
+export const verificationAccount = async (data) => {
+  const respone = await axios.put(`${API_ROOT}/v1/users/supports/verification`, data)
+  return respone.data
+}
