@@ -5,6 +5,7 @@ import { API_ROOT } from '~/utils/constants'
 const axiosInstance = axios.create({
   baseURL: API_ROOT
 })
+axiosInstance.defaults.withCredentials = true
 
 axiosInstance.interceptors.response.use(respone => respone, error => {
   const data = error.response.data
@@ -16,14 +17,6 @@ axiosInstance.interceptors.response.use(respone => respone, error => {
   return Promise.reject(error)
 })
 
-/**
- * Đối với sd axios
- * Tất cả các function bên dưới chỉ có request và lấy data, mà không có try-catch bắt lỗi
- * Lý do: phía FE chúng ta không cần thiết phải làm như vậy đối với mọi request bời nó sẽ gây ra việc
- * thừa code catch lỗi quá nhiều
- * Giải pháp: dùng Interceptors trong axios
- * có thể hiểu đơn giản Interceptors là cách mà ta đánh chặn giữa req và res để xử lý logic mà ta muốn
- */
 // Board API
 export const fetchBoardDetailsAPI = async (boardId) => {
   const respone = await axiosInstance.get(`${API_ROOT}/v1/boards/${boardId}`)
@@ -80,5 +73,10 @@ export const fetchUserAPI = async (email) => {
 
 export const verificationAccount = async (data) => {
   const respone = await axios.put(`${API_ROOT}/v1/users/supports/verification`, data)
+  return respone.data
+}
+
+export const signInUserAPI = async (data) => {
+  const respone = await axiosInstance.post(`${API_ROOT}/v1/users/signIn`, data)
   return respone.data
 }

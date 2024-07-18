@@ -1,12 +1,16 @@
 import { Box, Button, Container, Alert, SvgIcon, TextField, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useDispatch } from 'react-redux'
 import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { fetchUserAPI } from '~/apis'
 import { ReactComponent as TrelloIcon } from '~/assets/trello.svg'
+import { signIn } from '~/redux/slices/userSlice'
+import { EMAIL_RULE, FIELD_REQUIRED_MESSAGE } from '~/utils/validators'
 function Login() {
-  const { register, handleSubmit, formState: { errors } } = useForm()
+  const dispatch = useDispatch()
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm()
   const [searchParams, setSearchParams] = useSearchParams()
   const [isRegistered, setIsRegistered] = useState(false)
   const [isVerified, setIsVerified] = useState(false)
@@ -15,27 +19,32 @@ function Login() {
       for (const entry of searchParams.entries()) {
         const [key, value] = entry
         if (key !== 'registeredEmail' && key !== 'verifiedEmail') { continue }
-        if (/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
+        if (EMAIL_RULE.test(value)) {
           const user = await fetchUserAPI(value)
           switch (key) {
-          case 'registeredEmail':
-            if (user && !user.isActive) {
-              setIsRegistered(true)
-            }
-            break
-          case 'verifiedEmail':
-            if (user && user.isActive) {
-              setIsVerified(true)
-            }
-            break
-          default:
-            break
+            case 'registeredEmail':
+              if (user && !user.isActive) {
+                setIsRegistered(true)
+              }
+              break
+            case 'verifiedEmail':
+              if (user && user.isActive) {
+                setIsVerified(true)
+              }
+              break
+            default:
+              break
           }
         }
       }
     })()
 
   }, [searchParams])
+
+  const handleSignIn = async (data) => {
+    await toast.promise(dispatch(signIn(data)), { pending: 'Log in...' })
+  }
+
   return (
     <Container disableGutters maxWidth={false}
       sx={{
@@ -69,12 +78,12 @@ function Login() {
           </Box>
           {isRegistered && <Alert severity="info">An email has been sent to <b>{searchParams.get('registeredEmail')}</b><br></br> Please check and verify your account before logging in</Alert>}
           {isVerified && <Alert severity="success">Your email <b>{searchParams.get('verifiedEmail')}</b> has been verified.<br></br> Now you can log in to use this app</Alert>}
-          <form onSubmit={handleSubmit((data) => console.log(data))}>
-            <TextField margin='dense' fullWidth label="Email" {...register('email', { required: 'This input is required' })} error={errors.email ? true : false} />
+          <form onSubmit={handleSubmit(handleSignIn)}>
+            <TextField margin='dense' fullWidth label="Email" {...register('email', { required: FIELD_REQUIRED_MESSAGE })} error={errors.email ? true : false} />
             {errors.email && <Alert severity="error">{errors.email.message}</Alert>}
-            <TextField margin='dense' fullWidth type='password' label="Password" autoComplete='on' {...register('password', { required: 'This input is required' })} error={errors.password ? true : false} />
+            <TextField margin='dense' fullWidth type='password' label="Password" autoComplete='on' {...register('password', { required: FIELD_REQUIRED_MESSAGE })} error={errors.password ? true : false} />
             {errors.password && <Alert severity="error">{errors.password.message}</Alert>}
-            <Button sx={{ marginTop: '10px', width: '100%' }} type='submit' variant='contained' size='large'>Login</Button>
+            <Button disabled={isSubmitting} sx={{ marginTop: '10px', width: '100%' }} type='submit' variant='contained' size='large'>Login</Button>
           </form>
           <Link to='/register' style={{ marginTop: '10px', textDecoration: 'none', textAlign: 'center', color: '#1976d2' }}>Create new account</Link>
         </Box>

@@ -7,21 +7,20 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Box from '@mui/material/Box'
 import { Typography } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchBoard } from '~/redux/slices/boardSlice'
+import { fetchBoard, selectBoard } from '~/redux/slices/boardSlice'
 import { useParams } from 'react-router-dom'
 
 // import { mockData } from '~/apis/mock-data'
 function Board() {
   const dispatch = useDispatch()
   const { boardId } = useParams()
-  const isLoading = useSelector(state => state.board.isLoading)
-  const board = useSelector(state => state.board.data)
+  const board = useSelector(selectBoard)
   // 6658b2bbefe6fa78ac4369d0
   useEffect(() => {
     dispatch(fetchBoard(boardId))
   }, [dispatch, boardId])
 
-  if (isLoading) {
+  if (!board) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw', gap: 2 }}>
         <CircularProgress />

@@ -4,8 +4,9 @@ import { Link, createSearchParams, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { createNewUserAPI } from '~/apis'
 import { ReactComponent as TrelloIcon } from '~/assets/trello.svg'
+import { EMAIL_RULE, EMAIL_RULE_MESSAGE, PASSWORD_RULE, PASSWORD_RULE_MESSAGE } from '~/utils/validators'
 function Register() {
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting, isSubmitSuccessful } } = useForm({})
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm({})
   const navigate = useNavigate()
   const handleSignUp = async (data) => {
     await toast.promise(createNewUserAPI({ email: data.email, password: data.password }), {
@@ -64,16 +65,16 @@ function Register() {
             <TextField margin='dense' fullWidth label="Email" {...register('email', {
               required: 'This input is required',
               pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'Invalid email address. (example@gmail.com)'
+                value: EMAIL_RULE,
+                message: EMAIL_RULE_MESSAGE
               }
             })} error={errors.email ? true : false} />
             {errors.email && <Alert severity="error">{errors.email.message}</Alert>}
             <TextField margin='dense' fullWidth type='password' label="Password" autoComplete='on' {...register('password', {
               required: 'This input is required',
               pattern: {
-                value: /^(?=.*\d)(?=.*[a-z]).{8,}$/i,
-                message: 'At least 8 characters, must contain at least 1 letter and 1 number'
+                value: PASSWORD_RULE,
+                message: PASSWORD_RULE_MESSAGE
               }
             })} error={errors.password ? true : false} />
             {errors.password && <Alert severity="error">{errors.password.message}</Alert>}

@@ -1,21 +1,37 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Board from '~/pages/Boards/_id'
-import BoardList from './pages/Boards'
+import BoardList from '~/pages/Boards'
 import Auth from '~/pages/Auth'
-import VerifyAccount from './pages/Auth/VerifyAccount'
-import Login from '~/pages/Login'
-import Register from '~/pages/Register'
-import PageNotFound from '~/pages/PageNotFound'
+import VerifyAccount from '~/pages/Auth/VerifyAccount'
+import NotFound from '~/pages/NotFound'
+import { useSelector } from 'react-redux'
+import { selectIsAuthenticated } from '~/redux/slices/userSlice'
+import ProtectedRoute from '~/components/ProtectedRoute/ProtectedRoute'
 function App() {
+  const isAuthenticated = useSelector(selectIsAuthenticated)
   return (
     <Router>
       <Routes>
-        <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Register />} />
-        <Route path='/boards' element={<BoardList />} />
-        <Route path='/boards/:boardId' element={<Board />} />
-        <Route path='/account/verification' element={<VerifyAccount/>} />
-        <Route path='/*' element={<PageNotFound />} />
+        <Route exact path='/' element={isAuthenticated ?
+          <Navigate to='/boards' replace={true} />
+          : <Navigate to='/login' replace={true} />
+        } />
+        <Route path='/login' element={<Auth />} />
+        <Route path='/register' element={<Auth />} />
+        <Route path='/account/verification' element={<VerifyAccount />} />
+
+        <Route path='/boards' element={
+          <ProtectedRoute>
+            <BoardList />
+          </ProtectedRoute>
+        } />
+        <Route path='/boards/:boardId' element={
+          <ProtectedRoute>
+            <Board />
+          </ProtectedRoute>
+        } />
+
+        <Route path='/*' element={<NotFound />} />
       </Routes >
     </Router >
   )
