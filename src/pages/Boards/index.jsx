@@ -1,9 +1,11 @@
-//Boards List
-import React from 'react'
+import AppBar from '~/components/AppBar/AppBar'
 
 function BoardList() {
   return (
-    <div>BoardList</div>
+    <>
+      <AppBar />
+      <div>BoardList</div>
+    </>
   )
 }
 

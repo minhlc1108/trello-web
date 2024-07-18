@@ -9,6 +9,10 @@ import 'react-toastify/dist/ReactToastify.css'
 import { ConfirmProvider } from 'material-ui-confirm'
 import { Provider } from 'react-redux'
 import store from '~/redux/store'
+import persistStore from 'redux-persist/es/persistStore'
+import { PersistGate } from 'redux-persist/integration/react'
+
+let persitor = persistStore(store)
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   // <React.StrictMode>
@@ -21,9 +25,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     }}>
       <CssBaseline />
       <Provider store={store}>
-        <App />
+        <PersistGate loading={null} persistor={persitor}>
+          <App />
+          <ToastContainer position="bottom-left" theme="colored" />
+        </PersistGate>
       </Provider>
-      <ToastContainer position="bottom-left" theme="colored" />
     </ConfirmProvider>
   </CssVarsProvider>
   // </React.StrictMode>

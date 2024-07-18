@@ -1,34 +1,41 @@
 import { Box, Typography } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useEffect } from 'react'
-import { createSearchParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { Navigate, createSearchParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { verificationAccount } from '~/apis'
 
 function VerifyAccount() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { email, token } = Object.fromEntries(searchParams)
+
   const navigate = useNavigate()
   useEffect(() => {
-    const params = Object.fromEntries(searchParams)
-    toast.promise(verificationAccount(params), {
-      success: {
-        render: ({ data }) => {
-          navigate({
-            pathname: '/login',
-            search: createSearchParams({
-              verifiedEmail: params.email
-            }).toString()
-          })
-          return data.message
+    if (email && token) {
+      toast.promise(verificationAccount({ email, token }), {
+        success: {
+          render: ({ data }) => {
+            navigate({
+              pathname: '/login',
+              search: createSearchParams({
+                verifiedEmail: email
+              }).toString()
+            })
+            return data.message
+          }
+        },
+        error: {
+          render: ({ data }) => {
+            return data.response.data.message || data.message
+          }
         }
-      },
-      error: {
-        render: ({ data }) => {
-          return data.response.data.message || data.message
-        }
-      }
-    })
-  }, [searchParams])
+      })
+    }
+  }, [email, token, navigate])
+
+  if (!email || !token) {
+    return <Navigate to="/404" replace={true} />
+  }
 
   return (
     <Box sx={{
