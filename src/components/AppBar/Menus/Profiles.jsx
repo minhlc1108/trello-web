@@ -10,9 +10,13 @@ import IconButton from '@mui/material/IconButton'
 import PersonAdd from '@mui/icons-material/PersonAdd'
 import Settings from '@mui/icons-material/Settings'
 import Logout from '@mui/icons-material/Logout'
+import { toast } from 'react-toastify'
+import { useDispatch } from 'react-redux'
+import { signOut } from '~/redux/slices/userSlice'
 
 function Profiles() {
   const [anchorEl, setAnchorEl] = React.useState(null)
+  const dispatch = useDispatch()
   const open = Boolean(anchorEl)
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget)
@@ -20,6 +24,13 @@ function Profiles() {
 
   const handleClose = () => {
     setAnchorEl(null)
+  }
+
+  const handleLogOut = async () => {
+    await toast.promise(dispatch(signOut()), {
+      pending: 'Log out...',
+      success: 'Log out successfully!'
+    })
   }
 
   return (
@@ -69,7 +80,7 @@ function Profiles() {
           </ListItemIcon>
           Settings
         </MenuItem>
-        <MenuItem>
+        <MenuItem onClick={handleLogOut}>
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>
