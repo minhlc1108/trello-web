@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, current } from '@reduxjs/toolkit'
-import { signInUserAPI } from '~/apis'
+import { signInUserAPI, signOutUserAPI } from '~/apis'
 
 const initialState = {
   currentUser: null,
@@ -10,6 +10,10 @@ export const signIn = createAsyncThunk('users/signIn', async (data) => {
   return await signInUserAPI(data)
 })
 
+export const signOut = createAsyncThunk('users/signOut', async () => {
+  return await signOutUserAPI()
+})
+
 export const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -17,6 +21,10 @@ export const userSlice = createSlice({
     builder.addCase(signIn.fulfilled, (state, action) => {
       state.currentUser = action.payload
       state.isAuthenticated = true
+    })
+    builder.addCase(signOut.fulfilled, (state, action) => {
+      state.currentUser = null
+      state.isAuthenticated = false
     })
   }
 })

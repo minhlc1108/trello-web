@@ -13,7 +13,7 @@ function App() {
     <Router>
       <Routes>
         <Route exact path='/' element={isAuthenticated ?
-          <Navigate to='/boards' replace={true} />
+          <Navigate to='/boards/6658b2bbefe6fa78ac4369d0' replace={true} />
           : <Navigate to='/login' replace={true} />
         } />
         <Route path='/login' element={<Auth />} />

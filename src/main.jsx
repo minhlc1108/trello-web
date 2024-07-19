@@ -11,7 +11,9 @@ import { Provider } from 'react-redux'
 import store from '~/redux/store'
 import persistStore from 'redux-persist/es/persistStore'
 import { PersistGate } from 'redux-persist/integration/react'
+import { injectStore } from './apis'
 
+injectStore(store)
 let persitor = persistStore(store)
 
 ReactDOM.createRoot(document.getElementById('root')).render(

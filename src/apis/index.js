@@ -1,18 +1,35 @@
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { API_ROOT } from '~/utils/constants'
+import { signOut } from '~/redux/slices/userSlice'
 
-const axiosInstance = axios.create({
-  baseURL: API_ROOT
-})
+let store
+
+export const injectStore = _store => {
+  store = _store
+}
+
+const axiosInstance = axios.create()
+axiosInstance.defaults.timeout = 1000 * 60 * 10
 axiosInstance.defaults.withCredentials = true
 
-axiosInstance.interceptors.response.use(respone => respone, error => {
+axiosInstance.interceptors.response.use(respone => respone, async (error) => {
   const data = error.response.data
+  if (data.statusCode === 401) {
+    store.dispatch(signOut())
+  }
+  const originalRequest = error.config
+  if (data.statusCode === 410 && !originalRequest._retry) {
+    originalRequest._retry = true
+    return refreshTokenAPI().then((data) => {
+      return axiosInstance.request(originalRequest)
+    }).catch((error) => store.dispatch(signOut()))
+  }
+
   if (data?.message && typeof data?.message === 'string') {
     toast.error(data.message)
-  } else if (data?.status && typeof data?.status === 'string') {
-    toast.error(data.status + ` - Status code: ${data.code}`)
+  } else if (data?.statusCode && typeof data?.statusCode === 'string') {
+    toast.error(data.statusCode + ` - Status code: ${data.statusCode}`)
   }
   return Promise.reject(error)
 })
@@ -78,5 +95,15 @@ export const verificationAccount = async (data) => {
 
 export const signInUserAPI = async (data) => {
   const respone = await axiosInstance.post(`${API_ROOT}/v1/users/signIn`, data)
+  return respone.data
+}
+
+export const signOutUserAPI = async () => {
+  const respone = await axiosInstance.get(`${API_ROOT}/v1/users/signOut`)
+  return respone.data
+}
+
+export const refreshTokenAPI = async () => {
+  const respone = await axiosInstance.get(`${API_ROOT}/v1/users/refreshToken`)
   return respone.data
 }
