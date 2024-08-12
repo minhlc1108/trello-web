@@ -3,6 +3,7 @@ import Board from '~/pages/Boards/_id'
 import BoardList from '~/pages/Boards'
 import Auth from '~/pages/Auth'
 import VerifyAccount from '~/pages/Auth/VerifyAccount'
+import User from '~/pages/User'
 import NotFound from '~/pages/NotFound'
 import { useSelector } from 'react-redux'
 import { selectIsAuthenticated } from '~/redux/slices/userSlice'
@@ -20,11 +21,24 @@ function App() {
         <Route path='/register' element={<Auth />} />
         <Route path='/account/verification' element={<VerifyAccount />} />
 
+        <Route path='/user/account' element={
+          <ProtectedRoute>
+            <User tab={0} />
+          </ProtectedRoute>
+        } />
+
+        <Route path='/user/settings' element={
+          <ProtectedRoute>
+            <User tab={1} />
+          </ProtectedRoute>
+        } />
+
         <Route path='/boards' element={
           <ProtectedRoute>
             <BoardList />
           </ProtectedRoute>
         } />
+
         <Route path='/boards/:boardId' element={
           <ProtectedRoute>
             <Board />

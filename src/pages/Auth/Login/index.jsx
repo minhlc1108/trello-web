@@ -42,7 +42,8 @@ function Login() {
   }, [searchParams])
 
   const handleSignIn = async (data) => {
-    await toast.promise(dispatch(signIn(data)), { pending: 'Log in...' })
+    const { email, password } = data
+    await toast.promise(dispatch(signIn({ email: email.toLowerCase(), password })), { pending: 'Log in...' })
   }
 
   return (

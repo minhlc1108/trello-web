@@ -9,9 +9,15 @@ export const injectStore = _store => {
   store = _store
 }
 
-const axiosInstance = axios.create()
-axiosInstance.defaults.timeout = 1000 * 60 * 10
-axiosInstance.defaults.withCredentials = true
+const axiosInstance = axios.create({
+  headers: {
+    'Cache-Control': 'no-cache'
+  },
+  withCredentials: true,
+  timeout: 1000 * 60 * 10
+})
+// axiosInstance.defaults.timeout = 1000 * 60 * 10
+// axiosInstance.defaults.withCredentials = true
 
 axiosInstance.interceptors.response.use(respone => respone, async (error) => {
   const data = error.response.data
@@ -23,7 +29,9 @@ axiosInstance.interceptors.response.use(respone => respone, async (error) => {
     originalRequest._retry = true
     return refreshTokenAPI().then((data) => {
       return axiosInstance.request(originalRequest)
-    }).catch((error) => store.dispatch(signOut()))
+    }).catch((error) => {
+      store.dispatch(signOut())
+    })
   }
 
   if (data?.message && typeof data?.message === 'string') {
@@ -80,6 +88,11 @@ export const createNewCardAPI = async (newCardData) => {
 // User API
 export const createNewUserAPI = async (newUserData) => {
   const respone = await axios.post(`${API_ROOT}/v1/users`, newUserData)
+  return respone.data
+}
+
+export const updateUserAPI = async (updateData) => {
+  const respone = await axiosInstance.put(`${API_ROOT}/v1/users`, updateData)
   return respone.data
 }
 
