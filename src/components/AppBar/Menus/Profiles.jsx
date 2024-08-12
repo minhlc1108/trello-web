@@ -7,16 +7,19 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import Avatar from '@mui/material/Avatar'
 import Tooltip from '@mui/material/Tooltip'
 import IconButton from '@mui/material/IconButton'
-import PersonAdd from '@mui/icons-material/PersonAdd'
 import Settings from '@mui/icons-material/Settings'
 import Logout from '@mui/icons-material/Logout'
 import { toast } from 'react-toastify'
-import { useDispatch } from 'react-redux'
-import { signOut } from '~/redux/slices/userSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { selectCurrentUser, signOut } from '~/redux/slices/userSlice'
+import { Link } from 'react-router-dom'
+import { useConfirm } from 'material-ui-confirm'
 
 function Profiles() {
+  const confirm = useConfirm()
   const [anchorEl, setAnchorEl] = React.useState(null)
   const dispatch = useDispatch()
+  const user = useSelector(selectCurrentUser)
   const open = Boolean(anchorEl)
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget)
@@ -26,11 +29,17 @@ function Profiles() {
     setAnchorEl(null)
   }
 
-  const handleLogOut = async () => {
-    await toast.promise(dispatch(signOut()), {
-      pending: 'Log out...',
-      success: 'Log out successfully!'
-    })
+  const handleLogOut = () => {
+    confirm({
+      confirmationText: 'Yes',
+      title: 'Log out',
+      description: 'Are you sure?'
+    }).then(async () => {
+      await toast.promise(dispatch(signOut()), {
+        pending: 'Log out...',
+        success: 'Log out successfully!'
+      })
+    }).catch()
   }
 
   return (
@@ -46,8 +55,8 @@ function Profiles() {
         >
           <Avatar
             sx={{ width: 36, height: 36 }}
-            alt="Minh"
-            src='https://yt3.ggpht.com/yti/AGOGRCr6X5sBKPtPJZ5e9bPFEWkTDKX64WocLZ6zS1s6Vw=s88-c-k-c0x00ffffff-no-rj'
+            alt={user?.displayName}
+            src={user?.avatar}
           />
         </IconButton>
       </Tooltip>
@@ -61,25 +70,21 @@ function Profiles() {
           'aria-labelledby': 'basic-button-profiles'
         }}
       >
-        <MenuItem>
-          <Avatar sx={{ width: 28, height: 28, mr: 2 }} /> Profile
-        </MenuItem>
-        <MenuItem>
-          <Avatar sx={{ width: 28, height: 28, mr: 2 }} /> My account
-        </MenuItem>
+        <Link to='/user/account' style={{ textDecoration: 'none', color: 'inherit' }}>
+          <MenuItem onClick={handleClose}>
+            <Avatar sx={{ width: 28, height: 28, mr: 2 }} /> My account
+          </MenuItem>
+        </Link>
         <Divider />
-        <MenuItem>
-          <ListItemIcon>
-            <PersonAdd fontSize="small" />
-          </ListItemIcon>
-          Add another account
-        </MenuItem>
-        <MenuItem>
-          <ListItemIcon>
-            <Settings fontSize="small" />
-          </ListItemIcon>
-          Settings
-        </MenuItem>
+        <Link to='/user/settings' style={{ textDecoration: 'none', color: 'inherit' }}>
+          <MenuItem onClick={handleClose}>
+            <ListItemIcon>
+              <Settings fontSize="small" />
+            </ListItemIcon>
+            Settings
+          </MenuItem>
+        </Link>
+
         <MenuItem onClick={handleLogOut}>
           <ListItemIcon>
             <Logout fontSize="small" />

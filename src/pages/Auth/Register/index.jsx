@@ -9,7 +9,8 @@ function Register() {
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm({})
   const navigate = useNavigate()
   const handleSignUp = async (data) => {
-    await toast.promise(createNewUserAPI({ email: data.email, password: data.password }), {
+    const { email, password } = data
+    await toast.promise(createNewUserAPI({ email: email.toLowerCase(), password }), {
       pending: 'Register is in progress',
       success: {
         render: ({ data }) => {
