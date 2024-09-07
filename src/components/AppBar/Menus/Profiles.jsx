@@ -72,7 +72,7 @@ function Profiles() {
       >
         <Link to='/user/account' style={{ textDecoration: 'none', color: 'inherit' }}>
           <MenuItem onClick={handleClose}>
-            <Avatar sx={{ width: 28, height: 28, mr: 2 }} /> My account
+            <Avatar src={user?.avatar} alt={user?.displayName} sx={{ width: 28, height: 28, mr: 2 }} /> My account
           </MenuItem>
         </Link>
         <Divider />

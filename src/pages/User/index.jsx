@@ -27,6 +27,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { selectCurrentUser, signOut } from '~/redux/slices/userSlice'
 import { toast } from 'react-toastify'
 import { update } from '~/redux/slices/userSlice'
+import { useState } from 'react'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -45,6 +46,8 @@ function User({ tab }) {
   let user = useSelector(selectCurrentUser)
   const { register: registerTabAccount, setValue, handleSubmit: handleTabAccount, formState: { isSubmitting, errors: errorsTabAccount } } = useForm({ defaultValues: { displayName: user.displayName } })
   const { register: registerTabSetting, watch, handleSubmit: handleTabSetting, formState: { errors: errorsTabSetting } } = useForm()
+
+  const [isUpload, setIsUpload] = useState(false)
 
   const handleUpdate = async (data) => {
     const { displayName } = data
@@ -71,6 +74,7 @@ function User({ tab }) {
 
   const handleUpload = async (event) => {
     const data = new FormData()
+    setIsUpload(true)
     data.append('avatar', event.target.files[0])
     await toast.promise(dispatch(update(data)), {
       pending: 'Uploading...'
@@ -78,6 +82,7 @@ function User({ tab }) {
       if (!res.error) {
         toast.success('Upload avatar sucessfully!')
         event.target.value = ''
+        setIsUpload(false)
       }
     })
   }
@@ -95,7 +100,7 @@ function User({ tab }) {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
               <Avatar sx={{ width: 90, height: 90 }} src={user.avatar}></Avatar>
-              <Button variant='contained' component='label' role={undefined} startIcon={<FileUploadIcon />} size='small'>
+              <Button disabled={isUpload} variant='contained' component='label' role={undefined} startIcon={<FileUploadIcon />} size='small'>
                 Upload
                 <VisuallyHiddenInput type='file' onChange={handleUpload} />
               </Button>
