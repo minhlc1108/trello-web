@@ -43,6 +43,16 @@ axiosInstance.interceptors.response.use(respone => respone, async (error) => {
 })
 
 // Board API
+export const createNewBoardAPI = async (newBoardData) => {
+  const respone = await axiosInstance.post(`${API_ROOT}/v1/boards`, newBoardData)
+  return respone.data
+}
+
+export const fetchListBoardsAPI = async (path) => {
+  const respone = await axiosInstance.get(`${API_ROOT}/v1/boards${path}`)
+  return respone.data
+}
+
 export const fetchBoardDetailsAPI = async (boardId) => {
   const respone = await axiosInstance.get(`${API_ROOT}/v1/boards/${boardId}`)
   //axios trả kq về property data

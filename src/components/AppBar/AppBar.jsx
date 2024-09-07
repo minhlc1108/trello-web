@@ -20,7 +20,11 @@ import LibraryAddIcon from '@mui/icons-material/LibraryAdd'
 import SearchIcon from '@mui/icons-material/Search'
 import CloseIcon from '@mui/icons-material/Close'
 import InputAdornment from '@mui/material/InputAdornment'
+import { Link } from 'react-router-dom'
+import ModalCreateBoard from '~/components/ModalCreateBoard/ModalCreateBoard'
+
 function AppBar() {
+  const [openModal, setOpenModal] = useState(false)
   const [searchValue, setSearchValue] = useState('')
   return (
     <Box sx={{
@@ -37,7 +41,7 @@ function AppBar() {
     }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }} >
         <AppsIcon sx={{ color: 'white' }} />
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <Box as={Link} to='/boards' sx={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 0.5, ':hover': { cursor: 'pointer' } }}>
           <SvgIcon component={TrelloIcon} fontSize='small' inheritViewBox sx={{ color: 'white' }} />
           <Typography variant='span' sx={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white' }}>Trello</Typography>
         </Box>
@@ -47,9 +51,9 @@ function AppBar() {
           <Recent />
           <Starred />
           <Templates />
-          <Button sx={{ color: 'white' }} startIcon={<LibraryAddIcon />}>Create</Button>
+          <Button sx={{ color: 'white' }} startIcon={<LibraryAddIcon />} onClick={() => setOpenModal(true)}>Create</Button>
         </Box>
-
+        <ModalCreateBoard open={openModal} handleClose={() => setOpenModal(false)} />
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
