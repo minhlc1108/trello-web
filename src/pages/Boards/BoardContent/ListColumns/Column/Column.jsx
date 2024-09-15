@@ -27,6 +27,7 @@ import { useConfirm } from 'material-ui-confirm'
 import { createNewCardAPI, deleteColumnDetailsAPI } from '~/apis'
 import { useDispatch } from 'react-redux'
 import { addCard, deleteColumn } from '~/redux/slices/boardSlice'
+import LabelEditable from '~/components/LabelEditable/LabelEditable'
 
 function Column({ column }) {
   const dispatch = useDispatch()
@@ -98,7 +99,7 @@ function Column({ column }) {
     })
       .then(() => {
         dispatch(deleteColumn(column._id))
-        deleteColumnDetailsAPI(column._id).then(res => {
+        deleteColumnDetailsAPI(column._id, column.boardId).then(res => {
           toast.success(res?.deleteResult)
         })
       })
@@ -124,18 +125,19 @@ function Column({ column }) {
         {/* Box Column Header */}
         < Box sx={{
           height: (theme) => theme.trello.columnHeaderHeight,
-          p: 2,
+          p: 1.25,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          <Typography variant="h6" sx={{
+          {/* <Typography variant="h6" sx={{
             fontSize: '1rem',
             fontWeight: 'bold',
             cursor: 'pointer'
           }}>
             {column.title}
-          </Typography>
+          </Typography> */}
+          <LabelEditable title={column.title}></LabelEditable>
           <Box>
             <Tooltip title="More options">
               <ExpandMoreIcon
@@ -157,14 +159,15 @@ function Column({ column }) {
               }}
               onClick={handleClose}
             >
-              <MenuItem sx={{
-                '&:hover': {
-                  color: (theme) => theme.palette.success.main,
-                  '& .add-card-icon': {
-                    color: (theme) => theme.palette.success.main
+              <MenuItem
+                sx={{
+                  '&:hover': {
+                    color: (theme) => theme.palette.success.main,
+                    '& .add-card-icon': {
+                      color: (theme) => theme.palette.success.main
+                    }
                   }
-                }
-              }}
+                }}
                 onClick={() => setOpenNewCardForm(true)}
               >
                 <ListItemIcon><AddCardIcon className='add-card-icon' fontSize="small" /></ListItemIcon>
@@ -183,14 +186,15 @@ function Column({ column }) {
                 <ListItemText>Paste</ListItemText>
               </MenuItem>
               <Divider />
-              <MenuItem sx={{
-                '&:hover': {
-                  color: (theme) => theme.palette.warning.dark,
-                  '& .delete-forever-icon': {
-                    color: (theme) => theme.palette.warning.dark
+              <MenuItem
+                sx={{
+                  '&:hover': {
+                    color: (theme) => theme.palette.warning.dark,
+                    '& .delete-forever-icon': {
+                      color: (theme) => theme.palette.warning.dark
+                    }
                   }
-                }
-              }}
+                }}
                 onClick={removeColumn}
               >
                 <ListItemIcon><DeleteForeverIcon className='delete-forever-icon' fontSize="small" /></ListItemIcon>
@@ -212,7 +216,7 @@ function Column({ column }) {
         {/* Box Column Footer */}
         <Box sx={{
           height: (theme) => theme.trello.columnFooterHeight,
-          p: 2
+          p: 1.25
         }}>
           {!openNewCardForm ? <Box sx={{
             height: '100%',

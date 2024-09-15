@@ -10,9 +10,6 @@ export const injectStore = _store => {
 }
 
 const axiosInstance = axios.create({
-  headers: {
-    'Cache-Control': 'no-cache'
-  },
   withCredentials: true,
   timeout: 1000 * 60 * 10
 })
@@ -84,8 +81,8 @@ export const updateColumnDetailsAPI = async (columnId, updateData) => {
   return respone.data
 }
 
-export const deleteColumnDetailsAPI = async (columnId) => {
-  const respone = await axiosInstance.delete(`${API_ROOT}/v1/columns/${columnId}`)
+export const deleteColumnDetailsAPI = async (columnId, boardId) => {
+  const respone = await axiosInstance.delete(`${API_ROOT}/v1/columns/${columnId}`, { data: { boardId } })
   //axios trả kq về property data
   return respone.data
 }

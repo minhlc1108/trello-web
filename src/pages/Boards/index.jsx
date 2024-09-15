@@ -134,7 +134,7 @@ function BoardList() {
               (<Box sx={{ display: 'flex', alignItems: 'center', height: '60vh', width: '100%', justifyContent: 'center', gap: 2 }}>
                 <CircularProgress />
                 <Typography> Loading...</Typography>
-              </Box>) : isEmpty(boards) ? (<Grid item>Empty boards</Grid>)
+              </Box>) : isEmpty(boards) ? (<Grid marginTop={2} item>No boards</Grid>)
                 :
                 <Grid container marginTop={1} spacing={2}>
                   {boards.map(b => (
@@ -149,24 +149,14 @@ function BoardList() {
                         />
                         <CardContent sx={{ '&.MuiCardContent-root': { padding: 1 } }}>
                           <Typography
+                            noWrap
                             sx={{
-                              fontWeight: 'bold',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              display: '-webkit-box',
-                              WebkitLineClamp: '1',
-                              WebkitBoxOrient: 'vertical'
+                              fontWeight: 'bold'
                             }} gutterBottom variant="p">
                             {b.title}
                           </Typography>
                           <Typography
-                            sx={{
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              display: '-webkit-box',
-                              WebkitLineClamp: '1',
-                              WebkitBoxOrient: 'vertical'
-                            }}
+                            noWrap
                             variant="body2"
                             color="text.secondary">
                             {b.description}

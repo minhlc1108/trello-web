@@ -53,7 +53,7 @@ function Register() {
           maxWidth: '350px',
           borderRadius: 1,
           padding: '16px 20px',
-          bgcolor: '#fff',
+          bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#4b4953' : 'white'),
           display: 'flex',
           flexDirection: 'column',
           gap: 1

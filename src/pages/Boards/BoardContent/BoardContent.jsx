@@ -79,11 +79,9 @@ function BoardContent({ board }) {
 
       const isBelowOverItem = active.rect.current.translated
         && active.rect.current.translated.top > over.rect.top + over.rect.height
-
       const modifier = isBelowOverItem ? 1 : 0
 
-      newCardIndex = overCardIndex >= 0 ? overCardIndex + modifier : overColumn?.cards?.length + 1
-
+      newCardIndex = overCardIndex >= 0 ? overCardIndex + modifier : overColumn?.cards?.length
       // clone mảng orderedColumn cũ ra một cái mới để xử lý data rồi return cập nhật lại state mới
       const nextColumns = cloneDeep(prevColumns)
 
@@ -106,7 +104,7 @@ function BoardContent({ board }) {
         //update lai column id
         const rebuild_activeDraggingCardData = {
           ...activeDraggingCardData,
-          columnId: overColumn._id
+          columnId: activeDraggingCardId
         }
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, rebuild_activeDraggingCardData)
         // xoá placeholder card nếu đang tồn tại
@@ -118,7 +116,7 @@ function BoardContent({ board }) {
       if (triggerMethod === 'handleDragEnd') {
         dispatch(updateColumns(nextColumns))
 
-        let prevCardOrderIds = nextColumns.find(column => column._id === activeColumn._id)?.cardOrderIds
+        let prevCardOrderIds = nextColumns.find(column => column._id === oldColumnWhenDraggingCard._id)?.cardOrderIds
         // không đẩy card placeholder lên cho BE
         if (prevCardOrderIds[0].includes('placeholder-card')) prevCardOrderIds = []
         moveCardToDifferenceColumnAPI({
@@ -183,9 +181,7 @@ function BoardContent({ board }) {
       const { id: overCardId } = over
       // tìm 2 column tương ứng theo cardId
       const activeColumn = findColumnById(activeDraggingCardId)
-      // ở dragover đã xóa card placeholder ở orderedColumn rồi nên k thấy placeholder card trong đó sẽ k tìm đc column over
       const overColumn = findColumnById(overCardId) || overCardId.includes('placeholder-card') ? activeColumn : undefined
-
       if (!activeColumn || !overColumn) return
 
       // drag over chay trc drag end nó set lại state 1 lần r nên phải dùng state oldColumnWhenDraggingCard
@@ -215,7 +211,7 @@ function BoardContent({ board }) {
           dispatch(updateColumns(nextColumns))
           return nextColumns
         })
-        updateColumnDetailsAPI(overColumn._id, { cardOrderIds: dndOrderedCardIds })
+        updateColumnDetailsAPI(overColumn._id, { boardId: overColumn.boardId, cardOrderIds: dndOrderedCardIds })
       }
     }
 
