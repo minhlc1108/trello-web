@@ -5,4 +5,14 @@ export const BOARD_TYPES = {
   PRIVATE: 'private'
 }
 
+export const BOARD_ROLES = {
+  ADMIN: 'admin',
+  MEMBER: 'member'
+}
+
+export const CARD_MEMBERS_ACTION = {
+  JOIN: 'join',
+  LEAVE: 'leave'
+}
+
 export const DEFAULT_ITEMS_PER_PAGE = 18

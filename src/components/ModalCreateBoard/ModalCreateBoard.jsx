@@ -51,8 +51,6 @@ function ModalCreateBoard({ open, handleClose }) {
     <Modal
       open={open}
       onClose={handleClose}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
     >
       <Box sx={style}>
         <Typography variant="h6" component="h2">

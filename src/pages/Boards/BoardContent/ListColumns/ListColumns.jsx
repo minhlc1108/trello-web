@@ -14,7 +14,7 @@ import { addColumn } from '~/redux/slices/boardSlice'
 function ListColumn({ columns }) {
   const dispatch = useDispatch()
   const boardId = useSelector(state => state.board.data._id)
-
+  const role = useSelector(state => state.board.data.role);
   const [openNewColumnForm, setOpenNewColumnForm] = useState(false)
   const toggleOpenNewColumnForm = () => setOpenNewColumnForm(!openNewColumnForm)
 
@@ -62,7 +62,7 @@ function ListColumn({ columns }) {
         {columns?.map(column => <Column key={column._id} column={column} />)}
 
         {/* Box add new column */}
-        {!openNewColumnForm ?
+        {role && (!openNewColumnForm ?
           <Box sx={{
             minWidth: '250px',
             maxWidth: '250px',
@@ -142,8 +142,7 @@ function ListColumn({ columns }) {
                 onClick={toggleOpenNewColumnForm}
               />
             </Box>
-          </Box>}
-
+          </Box>)}
       </Box>
     </SortableContext>
   )

@@ -56,7 +56,7 @@ function BoardList() {
     setSelectedIndex(index)
   }
   return (
-    <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
+    <Container disableGutters maxWidth={false} sx={{ height: '100vh', bgcolor: theme => theme.palette.mode === 'dark' ? '#1A2027' : '#fff', }}>
       <AppBar />
       <ModalCreateBoard open={openModal} handleClose={() => setOpenModal(false)} />
       <Grid container spacing={2} paddingX={2} marginTop={2}>
@@ -147,7 +147,7 @@ function BoardList() {
                             backgroundColor: `rgb(${Math.floor(Math.random() * 256)},${Math.floor(Math.random() * 256)},${Math.floor(Math.random() * 256)})`
                           }}
                         />
-                        <CardContent sx={{ '&.MuiCardContent-root': { padding: 1 } }}>
+                        <CardContent sx={{ '&.MuiCardContent-root': { padding: 1 }, backgroundColor: theme => theme.palette.mode === 'dark' ? '#33485D' : "#fff" }}>
                           <Typography
                             noWrap
                             sx={{
@@ -162,7 +162,7 @@ function BoardList() {
                             {b.description}
                           </Typography>
                         </CardContent>
-                        <CardActions sx={{ justifyContent: 'flex-end', paddingTop: 0 }}>
+                        <CardActions sx={{ justifyContent: 'flex-end', paddingTop: 0, backgroundColor: theme => theme.palette.mode === 'dark' ? '#33485D' : "#fff" }}>
                           <Button
                             component={Link}
                             to={`/boards/${b._id}`}

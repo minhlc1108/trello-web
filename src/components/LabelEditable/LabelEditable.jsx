@@ -1,65 +1,61 @@
-import React, { useRef, useState } from 'react'
-import Typography from '@mui/material/Typography'
+// // TrungQuanDev: https://youtube.com/@trungquandev
+import { useState } from 'react'
 import TextField from '@mui/material/TextField'
 
-function LabelEditable({ title }) {
-  const [label, setLabel] = useState(title)
-  const [isEditing, setIsEditing] = useState(false)
-  const ref = useRef(title)
+// Một Trick xử lý css khá hay trong việc làm UI UX khi cần ẩn hiện một cái input: Hiểu đơn giản là thay vì phải tạo biến State để chuyển đổi qua lại giữa thẻ Input và Text thông thường thì chúng ta sẽ CSS lại cho cái thẻ Input trông như text bình thường, chỉ khi click và focus vào nó thì style lại trở về như cái input ban đầu.
+// Controlled Input trong MUI: https://mui.com/material-ui/react-text-field/#uncontrolled-vs-controlled
+function LabelEditable({ value, onChangedValue, inputFontSize = '16px', ...props }) {
+  const [inputValue, setInputValue] = useState(value)
 
-  const handleEditClick = () => {
-    setIsEditing(true)
-  }
+  // Blur là khi chúng ta không còn Focus vào phần tử nữa thì sẽ trigger hành động ở đây.
+  const triggerBlur = () => {
+    // Support Trim cái dữ liệu State inputValue cho đẹp luôn sau khi blur ra ngoài
+    setInputValue(inputValue.trim())
 
-  const handleChange = (e) => {
-    setLabel(e.target.value)
-  }
-
-  const handleBlur = () => {
-    setIsEditing(false)
-    if (!label.trim()) {
-      setLabel(ref.current)
+    // Nếu giá trị không có gì thay đổi hoặc Nếu user xóa hết nội dung thì set lại giá trị gốc ban đầu theo value từ props và return luôn không làm gì thêm
+    if (!inputValue || inputValue.trim() === value) {
+      setInputValue(value)
+      return
     }
+
+    // Khi giá trị có thay đổi ok thì gọi lên func ở Props cha để xử lý
+    onChangedValue(inputValue)
   }
 
   return (
-    <>
-      {isEditing ? (
-        <TextField
-          value={label}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          variant='outlined'
-          size='small'
-          autoFocus
-          sx={{
-            '& .MuiOutlinedInput-input': {
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              width: '240px',
-              paddingX: '6px'
-            }
-          }}
-          data-no-dnd="true"
-        >
-        </TextField>
-
-      ) : (
-        <Typography noWrap variant='h6'
-          sx={{
-            fontSize: '1rem',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            width: '240px',
-            height: 'fit-content',
-            paddingX: '6px'
-          }}
-          onClick={handleEditClick}
-        >
-          {label}
-        </Typography>
-      )}
-    </>
+    <TextField
+      id="toggle-focus-input-controlled"
+      fullWidth
+      variant='outlined'
+      size="small"
+      value={inputValue}
+      onChange={(event) => { setInputValue(event.target.value) }}
+      onBlur={triggerBlur}
+      {...props}
+      data-no-dnd="true"
+      sx={{
+        '& label': {},
+        '& input': { fontSize: inputFontSize, fontWeight: 'bold' },
+        '& .MuiOutlinedInput-root': {
+          backgroundColor: 'transparent',
+          '& fieldset': { borderColor: 'transparent' }
+        },
+        '& .MuiOutlinedInput-root:hover': {
+          borderColor: 'transparent',
+          '& fieldset': { borderColor: 'transparent' }
+        },
+        '& .MuiOutlinedInput-root.Mui-focused': {
+          backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#33485D' : 'white',
+          '& fieldset': { borderColor: 'primary.main' }
+        },
+        '& .MuiOutlinedInput-input': {
+          px: '6px',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          textOverflow: 'ellipsis'
+        }
+      }}
+    />
   )
 }
 

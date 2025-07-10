@@ -51,8 +51,8 @@ function AppBar() {
           <Recent />
           <Starred />
           <Templates />
-          <Button sx={{ color: 'white' }} startIcon={<LibraryAddIcon />} onClick={() => setOpenModal(true)}>Create</Button>
         </Box>
+        <Button sx={{ color: 'white' }} startIcon={<LibraryAddIcon />} onClick={() => setOpenModal(true)}>Create</Button>
         <ModalCreateBoard open={openModal} handleClose={() => setOpenModal(false)} />
       </Box>
 

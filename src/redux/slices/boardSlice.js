@@ -46,6 +46,22 @@ export const boardSlice = createSlice({
         columnToUpdate.cards.push(createdCard)
         columnToUpdate.cardOrderIds.push(createdCard._id)
       }
+    },
+    updateCardInBoard: (state, action) => {
+      const incomingCard = action.payload
+      const columnToUpdate = state.data.columns.find(column => column._id === incomingCard.columnId)
+      if (columnToUpdate) {
+        const card = columnToUpdate.cards.find(card => card._id === incomingCard._id)
+        if (card) {
+          const updateKeys = ["title", "description", "cover", "memberIds", "members", "comments"]
+          updateKeys.forEach(key => {
+            if (incomingCard[key] !== undefined) {
+              card[key] = incomingCard[key]
+            }
+          })
+        }
+      }
+
     }
   },
   extraReducers: (builder) => {
@@ -60,6 +76,19 @@ export const boardSlice = createSlice({
             column.cardOrderIds = [generatePlaceholderCard(column)._id]
           } else {
             column.cards = mapOrder(column.cards, column.cardOrderIds, '_id')
+            column.cards.forEach(card => {
+              let members = []
+              if (Array.isArray(card.memberIds) && card.memberIds.length > 0) {
+                card.memberIds.forEach(memberId => {
+                  const member = [...board.members, ...board.owners].find(m => m._id === memberId)
+                  if (member) {
+                    members.push(member)
+                  }
+                })
+              }
+              card.members = members
+              card.comments = [...card.comments].reverse()
+            })
           }
         })
         state.data = board
@@ -67,7 +96,7 @@ export const boardSlice = createSlice({
   }
 })
 
-export const { addColumn, moveColumn, addCard, updateColumns, deleteColumn } = boardSlice.actions
+export const { addColumn, moveColumn, addCard, updateColumns, deleteColumn, updateCardInBoard } = boardSlice.actions
 
 export const selectBoard = (state) => {
   return state.board.data
