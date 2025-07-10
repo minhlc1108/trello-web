@@ -1,5 +1,4 @@
 import Box from '@mui/system/Box'
-import Typography from '@mui/material/Typography'
 import { useState } from 'react'
 import Button from '@mui/material/Button'
 import Menu from '@mui/material/Menu'
@@ -24,7 +23,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { toast } from 'react-toastify'
 import { useConfirm } from 'material-ui-confirm'
-import { createNewCardAPI, deleteColumnDetailsAPI } from '~/apis'
+import { createNewCardAPI, deleteColumnDetailsAPI, updateColumnDetailsAPI } from '~/apis'
 import { useDispatch } from 'react-redux'
 import { addCard, deleteColumn } from '~/redux/slices/boardSlice'
 import LabelEditable from '~/components/LabelEditable/LabelEditable'
@@ -99,7 +98,7 @@ function Column({ column }) {
     })
       .then(() => {
         dispatch(deleteColumn(column._id))
-        deleteColumnDetailsAPI(column._id, column.boardId).then(res => {
+        deleteColumnDetailsAPI(column._id, { boardId: column.boardId }).then(res => {
           toast.success(res?.deleteResult)
         })
       })
@@ -118,26 +117,23 @@ function Column({ column }) {
           ml: 2,
           borderRadius: '6px',
           height: 'fit-content',
+          display: 'flex',
+          flexDirection: 'column',
           maxHeight: (theme) => `calc(${theme.trello.boardContentHeight} - ${theme.spacing(5)})`
         }
         }>
 
         {/* Box Column Header */}
         < Box sx={{
-          height: (theme) => theme.trello.columnHeaderHeight,
+          minHeight: (theme) => theme.trello.columnHeaderHeight,
           p: 1.25,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          {/* <Typography variant="h6" sx={{
-            fontSize: '1rem',
-            fontWeight: 'bold',
-            cursor: 'pointer'
-          }}>
-            {column.title}
-          </Typography> */}
-          <LabelEditable title={column.title}></LabelEditable>
+          <LabelEditable value={column.title} onChangedValue={ async (value) => {
+            await updateColumnDetailsAPI(column._id, { boardId: column.boardId, title: value })
+          } }fontSize={"16px"} width="100%"></LabelEditable>
           <Box>
             <Tooltip title="More options">
               <ExpandMoreIcon

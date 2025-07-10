@@ -82,9 +82,8 @@ function User({ tab }) {
       if (!res.error) {
         toast.success('Upload avatar sucessfully!')
         event.target.value = ''
-        setIsUpload(false)
       }
-    })
+    }).finally(() => setIsUpload(false))
   }
   return (
     <>

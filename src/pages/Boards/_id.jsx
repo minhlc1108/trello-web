@@ -9,18 +9,24 @@ import { Typography } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchBoard, selectBoard } from '~/redux/slices/boardSlice'
 import { useParams } from 'react-router-dom'
+import ModalCardDetail from '~/components/ModalCardDetail/ModalCardDetail'
+import { useState } from 'react'
+import { selectCurrentActiveCard } from '~/redux/slices/activeCardSlice'
 
-// import { mockData } from '~/apis/mock-data'
 function Board() {
   const dispatch = useDispatch()
   const { boardId } = useParams()
   const board = useSelector(selectBoard)
-  // 6658b2bbefe6fa78ac4369d0
+  const currentActiveCard = useSelector(selectCurrentActiveCard)
+  const [isLoading, setIsLoading] = useState(false)
   useEffect(() => {
-    dispatch(fetchBoard(boardId))
+    setIsLoading(true)
+    dispatch(fetchBoard(boardId)).then(() => {
+      setIsLoading(false)
+    })
   }, [dispatch, boardId])
 
-  if (!board) {
+  if (isLoading || !board) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw', gap: 2 }}>
         <CircularProgress />
@@ -35,6 +41,7 @@ function Board() {
         <BoardContent
           board={board}
         />
+        {currentActiveCard && currentActiveCard.boardId === boardId && <ModalCardDetail />}
       </Container >
     )
 

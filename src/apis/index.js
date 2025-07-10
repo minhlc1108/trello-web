@@ -13,22 +13,19 @@ const axiosInstance = axios.create({
   withCredentials: true,
   timeout: 1000 * 60 * 10
 })
-// axiosInstance.defaults.timeout = 1000 * 60 * 10
-// axiosInstance.defaults.withCredentials = true
 
 axiosInstance.interceptors.response.use(respone => respone, async (error) => {
   const data = error.response.data
-  if (data.statusCode === 401) {
-    store.dispatch(signOut())
-  }
   const originalRequest = error.config
   if (data.statusCode === 410 && !originalRequest._retry) {
     originalRequest._retry = true
-    return refreshTokenAPI().then((data) => {
+    try {
+      await refreshTokenAPI()
       return axiosInstance.request(originalRequest)
-    }).catch((error) => {
+    } catch (error) {
       store.dispatch(signOut())
-    })
+      return Promise.reject(error)
+    }
   }
 
   if (data?.message && typeof data?.message === 'string') {
@@ -52,19 +49,16 @@ export const fetchListBoardsAPI = async (path) => {
 
 export const fetchBoardDetailsAPI = async (boardId) => {
   const respone = await axiosInstance.get(`${API_ROOT}/v1/boards/${boardId}`)
-  //axios trả kq về property data
   return respone.data
 }
 
 export const updateBoardDetailsAPI = async (boardId, updateData) => {
   const respone = await axiosInstance.put(`${API_ROOT}/v1/boards/${boardId}`, updateData)
-  //axios trả kq về property data
   return respone.data
 }
 
 export const moveCardToDifferenceColumnAPI = async (updateData) => {
   const respone = await axiosInstance.put(`${API_ROOT}/v1/boards/supports/move_card`, updateData)
-  //axios trả kq về property data
   return respone.data
 }
 
@@ -77,18 +71,23 @@ export const createNewColumnAPI = async (newColumnData) => {
 
 export const updateColumnDetailsAPI = async (columnId, updateData) => {
   const respone = await axiosInstance.put(`${API_ROOT}/v1/columns/${columnId}`, updateData)
-  //axios trả kq về property data
   return respone.data
 }
 
-export const deleteColumnDetailsAPI = async (columnId, boardId) => {
-  const respone = await axiosInstance.delete(`${API_ROOT}/v1/columns/${columnId}`, { data: { boardId } })
-  //axios trả kq về property data
+export const deleteColumnDetailsAPI = async (columnId, deleteData) => {
+  const respone = await axiosInstance.delete(`${API_ROOT}/v1/columns/${columnId}`, {
+    data: deleteData
+  })
   return respone.data
 }
 // Card API
 export const createNewCardAPI = async (newCardData) => {
   const respone = await axiosInstance.post(`${API_ROOT}/v1/cards`, newCardData)
+  return respone.data
+}
+
+export const updateCardDetailsAPI = async (cardId, updateData) => {
+  const respone = await axiosInstance.put(`${API_ROOT}/v1/cards/${cardId}`, updateData)
   return respone.data
 }
 

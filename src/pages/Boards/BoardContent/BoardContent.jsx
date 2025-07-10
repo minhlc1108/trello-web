@@ -30,7 +30,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
 }
 
-function BoardContent({ board }) {
+function BoardContent({ board, handleOpen }) {
   const dispatch = useDispatch()
   // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
   // Yêu cầu chuột di chuyển 10px thì kích hoạt event (fix click gọi event)
@@ -120,6 +120,7 @@ function BoardContent({ board }) {
         // không đẩy card placeholder lên cho BE
         if (prevCardOrderIds[0].includes('placeholder-card')) prevCardOrderIds = []
         moveCardToDifferenceColumnAPI({
+          boardId: board._id,
           cardId: activeDraggingCardId,
           prevColumnId: oldColumnWhenDraggingCard._id,
           prevCardOrderIds,
@@ -211,7 +212,7 @@ function BoardContent({ board }) {
           dispatch(updateColumns(nextColumns))
           return nextColumns
         })
-        updateColumnDetailsAPI(overColumn._id, { boardId: overColumn.boardId, cardOrderIds: dndOrderedCardIds })
+        updateColumnDetailsAPI(overColumn._id, { boardId: overColumn.boardId, cardOrderIds: dndOrderedCardIds, updateAt: Date.now() })
       }
     }
 
@@ -281,8 +282,6 @@ function BoardContent({ board }) {
     <DndContext
       sensors={sensors}
       collisionDetection={collisionDetectionStrategy}
-      //bi flickering
-      // collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
@@ -293,7 +292,7 @@ function BoardContent({ board }) {
         height: (theme) => theme.trello.boardContentHeight,
         padding: '10px 0'
       }}>
-        <ListColumns columns={orderedColumns} />
+        <ListColumns columns={orderedColumns} handleOpen={handleOpen} />
         <DragOverlay dropAnimation={customDropAnimation}>
           {!activeDragItemType && null}
           {(activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column={activeDragItemData}></Column>}
