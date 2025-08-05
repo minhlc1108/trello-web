@@ -103,7 +103,7 @@ export const updateUserAPI = async (updateData) => {
 }
 
 export const fetchUserAPI = async (email) => {
-  const respone = await axiosInstance.get(`${API_ROOT}/v1/users/${email}`)
+  const respone = await axiosInstance.get(`${API_ROOT}/v1/users/email/${email}`)
   return respone.data
 }
 
@@ -126,3 +126,15 @@ export const refreshTokenAPI = async () => {
   const respone = await axiosInstance.get(`${API_ROOT}/v1/users/refreshToken`)
   return respone.data
 }
+
+export const searchUserAPI = async (searchQuery) => {
+  const respone = await axiosInstance.get(`${API_ROOT}/v1/users/search?q=${searchQuery}`)
+  return respone.data
+}
+
+// Invite API
+export const inviteMemberToBoardAPI = async (data) => {
+  const respone = await axiosInstance.post(`${API_ROOT}/v1/invites/board`, data)
+  return respone.data
+}
+

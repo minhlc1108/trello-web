@@ -24,6 +24,9 @@ function CardDescriptionMdEditor({ card }) {
 
   const updateCardDescription = async () => {
     setMarkdownEditMode(false)
+    if (cardDescription === card.description) {
+      return
+    }
     await updateCardDetailsAPI(card._id, { boardId: card.boardId, description: cardDescription })
     dispatch(updateCardInBoard({ ...card, description: cardDescription }))
   }
