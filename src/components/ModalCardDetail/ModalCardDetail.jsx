@@ -11,7 +11,6 @@ import { styled } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import SubjectOutlinedIcon from "@mui/icons-material/SubjectOutlined";
 import ListOutlinedIcon from "@mui/icons-material/ListOutlined";
-import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import PersonAddOutlinedIcon from "@mui/icons-material/PersonAddOutlined";
 import PersonRemoveOutlinedIcon from '@mui/icons-material/PersonRemoveOutlined';
 import SellOutlinedIcon from "@mui/icons-material/SellOutlined";
@@ -32,7 +31,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { clearCurrentActiveCard, selectCurrentActiveCard, updateCurrentActiveCard } from "~/redux/slices/activeCardSlice";
 import { selectCurrentUser } from "~/redux/slices/userSlice";
-import { boardSlice, selectBoard, updateCardInBoard } from "~/redux/slices/boardSlice";
+import { selectBoard, updateCardInBoard } from "~/redux/slices/boardSlice";
 import { updateCardDetailsAPI } from "~/apis";
 import { toast } from "react-toastify";
 import { CARD_MEMBERS_ACTION } from "~/utils/constants";
@@ -79,12 +78,9 @@ function ModalCardDetail() {
   }
 
   const handleTitleChange = async (newTitle) => {
-    if (!newTitle || newTitle.trim() === currentActiveCard.title) {
-      return
-    }
     await updateCardDetailsAPI(currentActiveCard._id, { boardId: currentActiveCard.boardId, title: newTitle.trim() })
-    dispatch(updateCurrentActiveCard({ ...currentActiveCard, title: newTitle }))
-    dispatch(updateCardInBoard({ ...currentActiveCard, title: newTitle }))
+    dispatch(updateCurrentActiveCard({ ...currentActiveCard, title: newTitle.trim() }))
+    dispatch(updateCardInBoard({ ...currentActiveCard, title: newTitle.trim() }))
   }
 
   const handleUploadCover = async (event) => {
@@ -253,12 +249,12 @@ function ModalCardDetail() {
           <Grid xs={12} sm={3}>
             <Stack direction="column" spacing={1}>
               {(Array.isArray(currentActiveCard?.memberIds) && currentActiveCard?.memberIds?.includes(currentUser._id)) ? (
-                <SidebarItem className="active remove" onClick={() => {handleUpdateMembers(currentUser._id, CARD_MEMBERS_ACTION.LEAVE)}}>
+                <SidebarItem className="active remove" onClick={() => { handleUpdateMembers(currentUser._id, CARD_MEMBERS_ACTION.LEAVE) }}>
                   <PersonRemoveOutlinedIcon fontSize="small" />
                   Leave
                 </SidebarItem>
               ) : (
-                <SidebarItem className="active" onClick={() => {handleUpdateMembers(currentUser._id, CARD_MEMBERS_ACTION.JOIN)}}>
+                <SidebarItem className="active" onClick={() => { handleUpdateMembers(currentUser._id, CARD_MEMBERS_ACTION.JOIN) }}>
                   <PersonAddOutlinedIcon fontSize="small" />
                   Join
                 </SidebarItem>

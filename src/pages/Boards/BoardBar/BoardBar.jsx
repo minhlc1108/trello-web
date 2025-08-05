@@ -8,9 +8,10 @@ import FilterListIcon from '@mui/icons-material/FilterList'
 import Avatar from '@mui/material/Avatar'
 import AvatarGroup from '@mui/material/AvatarGroup'
 import Tooltip from '@mui/material/Tooltip'
-import Button from '@mui/material/Button'
-import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import { capitalizeFirstLetter } from '~/utils/formatter'
+import { useSelector } from 'react-redux'
+import { selectCurrentUser } from '~/redux/slices/userSlice'
+import ModalInvite from '~/components/ModalInvite/ModalInvite'
 
 const MENU_STYLES = {
   color: 'white',
@@ -27,6 +28,7 @@ const MENU_STYLES = {
 }
 
 function BoardBar({ board }) {
+  const currentUser = useSelector(selectCurrentUser)
   return (
     <Box sx={{
       width: '100%',
@@ -75,15 +77,7 @@ function BoardBar({ board }) {
         />
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Button
-          variant="outlined"
-          startIcon={<PersonAddIcon />}
-          sx={{
-            color: 'white',
-            borderColor: 'white',
-            '&:hover': { borderColor: 'white' }
-          }}
-        >Invite</Button>
+        <ModalInvite />
         <AvatarGroup
           max={7}
           sx={{
@@ -99,48 +93,16 @@ function BoardBar({ board }) {
             }
           }}
         >
-          <Tooltip title='minh'>
-            <Avatar alt="Minh Le" src="https://yt3.ggpht.com/yti/AGOGRCr6X5sBKPtPJZ5e9bPFEWkTDKX64WocLZ6zS1s6Vw=s88-c-k-c0x00ffffff-no-rj" />
-          </Tooltip>
-          <Tooltip title='minh'>
-            <Avatar alt="Minh Le" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-L6DYDB3WQ-ltV0OHiNXfM9FEAfUnhjgUaA&usqp=CAU" />
-          </Tooltip>
-          <Tooltip title='minh'>
-            <Avatar alt="Minh Le" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSe_2cZMKysro3YpIWasiWcKy8bk8bHLelR0g&usqp=CAU" />
-          </Tooltip>
-          <Tooltip title='minh'>
-            <Avatar alt="Minh Le" src="https://png.pngtree.com/png-clipart/20211121/original/pngtree-funny-avatar-vector-icons-png-png-image_6948004.png" />
-          </Tooltip>
-          <Tooltip title='minh'>
-            <Avatar alt="Minh Le" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1qm4wFghbqBE1Yp_yt_ExCO5uYfqs_z2MtQ&usqp=CAU" />
-          </Tooltip>
-          <Tooltip title='minh'>
-            <Avatar alt="Minh Le" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRx-dSBRaoSO3rE0KJ1lb9bjuJUE1eayGbJJA&usqp=CAU" />
-          </Tooltip>
-          <Tooltip title='minh'>
-            <Avatar alt="Minh Le" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSve1KURcIup7UuJVn0N1NbVv1bSDXLVKooXg&usqp=CAU" />
-          </Tooltip>
-          <Tooltip title='minh'>
-            <Avatar alt="Minh Le" src="https://yt3.ggpht.com/yti/AGOGRCr6X5sBKPtPJZ5e9bPFEWkTDKX64WocLZ6zS1s6Vw=s88-c-k-c0x00ffffff-no-rj" />
-          </Tooltip>
-          <Tooltip title='minh'>
-            <Avatar alt="Minh Le" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-L6DYDB3WQ-ltV0OHiNXfM9FEAfUnhjgUaA&usqp=CAU" />
-          </Tooltip>
-          <Tooltip title='minh'>
-            <Avatar alt="Minh Le" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSe_2cZMKysro3YpIWasiWcKy8bk8bHLelR0g&usqp=CAU" />
-          </Tooltip>
-          <Tooltip title='minh'>
-            <Avatar alt="Minh Le" src="https://png.pngtree.com/png-clipart/20211121/original/pngtree-funny-avatar-vector-icons-png-png-image_6948004.png" />
-          </Tooltip>
-          <Tooltip title='minh'>
-            <Avatar alt="Minh Le" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1qm4wFghbqBE1Yp_yt_ExCO5uYfqs_z2MtQ&usqp=CAU" />
-          </Tooltip>
-          <Tooltip title='minh'>
-            <Avatar alt="Minh Le" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRx-dSBRaoSO3rE0KJ1lb9bjuJUE1eayGbJJA&usqp=CAU" />
-          </Tooltip>
-          <Tooltip title='minh'>
-            <Avatar alt="Minh Le" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSve1KURcIup7UuJVn0N1NbVv1bSDXLVKooXg&usqp=CAU" />
-          </Tooltip>
+          {[...board.owners, ...board.members].filter(member => member._id === currentUser._id).map((member) => (
+            <Tooltip key={member._id} title={member.displayName + ' (you)'}>
+              <Avatar key={member._id} src={member.avatar} />
+            </Tooltip>
+          ))}
+          {[...board.owners, ...board.members].filter(member => member._id !== currentUser._id).map((member) => (
+            <Tooltip key={member._id} title={member.displayName}>
+              <Avatar src={member.avatar} />
+            </Tooltip>
+          ))}
         </AvatarGroup>
       </Box>
     </Box>
