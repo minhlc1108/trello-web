@@ -13,6 +13,7 @@ import { CARD_MEMBERS_ACTION } from "~/utils/constants";
 function CardUserGroup({ members, handleUpdateMembers }) {
   const [anchorEl, setAnchorEl] = useState(null)
   const board = useSelector(selectBoard)
+  const role = useSelector(state => state.board.data.role)
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -35,29 +36,31 @@ function CardUserGroup({ members, handleUpdateMembers }) {
           />
         </Tooltip>
       ))}
-      <Tooltip title="Add new member">
-        <Box
-          sx={{
-            width: 36,
-            height: 36,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: "50%",
-            fontSize: "14px",
-            fontWeight: 600,
-            color: (theme) => theme.palette.mode === 'dark' ? '#90caf9' : '#172b4d',
-            bgcolor: (theme) => theme.palette.mode === 'dark' ? '#2f3542' : theme.palette.grey[200],
-            '&:hover': {
-              color: (theme) => theme.palette.mode === 'dark' ? '#000000de' : '#0c66e4',
-              bgcolor: (theme) => theme.palette.mode === 'dark' ? '#90caf9' : '#e9f2ff'
-            }
-          }}
-          onClick={handleClick}
-        >
-          <AddIcon fontSize="small" />
-        </Box>
-      </Tooltip>
+      {role !== null && (
+        <Tooltip Tooltip title="Add new member">
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "50%",
+              fontSize: "14px",
+              fontWeight: 600,
+              color: (theme) => theme.palette.mode === 'dark' ? '#90caf9' : '#172b4d',
+              bgcolor: (theme) => theme.palette.mode === 'dark' ? '#2f3542' : theme.palette.grey[200],
+              '&:hover': {
+                color: (theme) => theme.palette.mode === 'dark' ? '#000000de' : '#0c66e4',
+                bgcolor: (theme) => theme.palette.mode === 'dark' ? '#90caf9' : '#e9f2ff'
+              }
+            }}
+            onClick={handleClick}
+          >
+            <AddIcon fontSize="small" />
+          </Box>
+        </Tooltip>
+      )}
 
       <Popover
         id={id}
@@ -77,7 +80,7 @@ function CardUserGroup({ members, handleUpdateMembers }) {
                 sx={{ cursor: 'pointer' }}
                 overlap="rectangular"
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                badgeContent= {members?.some(m => m._id === member._id) ? <CheckCircleIcon fontSize="small" sx={{ color: '#27ae60' }} /> : null}
+                badgeContent={members?.some(m => m._id === member._id) ? <CheckCircleIcon fontSize="small" sx={{ color: '#27ae60' }} /> : null}
               >
                 <Avatar
                   sx={{ width: 34, height: 34 }}
@@ -92,7 +95,7 @@ function CardUserGroup({ members, handleUpdateMembers }) {
           )}
         </Box>
       </Popover>
-    </Box>
+    </Box >
   );
 }
 

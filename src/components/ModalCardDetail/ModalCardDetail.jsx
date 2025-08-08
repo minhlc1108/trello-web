@@ -27,14 +27,16 @@ import Divider from "@mui/material/Divider";
 import CardUserGroup from "./CardUserGroup";
 import CardDescriptionMdEditor from "./CardDescriptionMdEditor";
 import CardActivitySection from "./CardActivitySection";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { clearCurrentActiveCard, selectCurrentActiveCard, updateCurrentActiveCard } from "~/redux/slices/activeCardSlice";
+import { clearCurrentActiveCard, selectCurrentActiveCard, updateCoverCurrentActiveCard, updateCurrentActiveCard, updateMembersCurrentActiveCard, updateTitleCurrentActiveCard } from "~/redux/slices/activeCardSlice";
 import { selectCurrentUser } from "~/redux/slices/userSlice";
 import { selectBoard, updateCardInBoard } from "~/redux/slices/boardSlice";
 import { updateCardDetailsAPI } from "~/apis";
 import { toast } from "react-toastify";
 import { CARD_MEMBERS_ACTION } from "~/utils/constants";
+import socket from "~/utils/socket";
+import Board from "~/pages/Boards/_id";
 
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -72,6 +74,17 @@ function ModalCardDetail() {
   const currentActiveCard = useSelector(selectCurrentActiveCard)
   const currentUser = useSelector(selectCurrentUser)
   const currentBoard = useSelector(selectBoard)
+  useEffect(() => {
+    socket.on('s_changeActiveCard', (card) => {
+      if (currentActiveCard != null && card._id === currentActiveCard._id) {
+        dispatch(updateCurrentActiveCard(card))
+      }
+    })
+    return () => {
+      socket.off('s_changeActiveCard')
+    }
+  }, [dispatch, currentActiveCard])
+
   const handleCloseModal = () => {
     setIsOpen(false)
     dispatch(clearCurrentActiveCard())
@@ -79,7 +92,7 @@ function ModalCardDetail() {
 
   const handleTitleChange = async (newTitle) => {
     await updateCardDetailsAPI(currentActiveCard._id, { boardId: currentActiveCard.boardId, title: newTitle.trim() })
-    dispatch(updateCurrentActiveCard({ ...currentActiveCard, title: newTitle.trim() }))
+    dispatch(updateTitleCurrentActiveCard(newTitle.trim()))
     dispatch(updateCardInBoard({ ...currentActiveCard, title: newTitle.trim() }))
   }
 
@@ -94,7 +107,7 @@ function ModalCardDetail() {
       if (!res.error) {
         toast.success('Upload cover successfully!')
         event.target.value = ''
-        dispatch(updateCurrentActiveCard({ ...currentActiveCard, cover: res.cover }))
+        dispatch(updateCoverCurrentActiveCard(res.cover))
         dispatch(updateCardInBoard({ ...currentActiveCard, cover: res.cover }))
       }
     }).finally(() => setIsUploading(false))
@@ -119,7 +132,7 @@ function ModalCardDetail() {
         })
       }
       res.members = members
-      dispatch(updateCurrentActiveCard({ ...currentActiveCard, memberIds: res.memberIds, members: res.members }))
+      dispatch(updateMembersCurrentActiveCard({ memberIds: res.memberIds, members: res.members }))
       dispatch(updateCardInBoard({ ...currentActiveCard, memberIds: res.memberIds, members: res.members }))
       if (userId !== currentUser._id) {
         toast.info(`You ${action === CARD_MEMBERS_ACTION.JOIN ? 'added' : 'removed'} ${[...currentBoard.members, ...currentBoard.owners].find(m => m._id === userId)?.displayName} to the card!`)
@@ -128,6 +141,7 @@ function ModalCardDetail() {
       }
     }
   }
+
   return (
     <Modal
       open={isOpen}
@@ -183,21 +197,23 @@ function ModalCardDetail() {
                   : "rgb(228, 228, 228)",
             }}
           ></Box>
-          <Button
-            disabled={isUploading}
-            startIcon={<CenterFocusWeakIcon />}
-            size="medium"
-            sx={{
-              position: "absolute",
-              right: 0,
-              bottom: 0,
-              margin: 1.5
-            }}
-            component="label"
-          >
-            Cover
-            <input type="file" style={{ display: "none" }} accept="image/*" onChange={handleUploadCover} />
-          </Button>
+          {currentBoard.role !== null &&
+            <Button
+              disabled={isUploading}
+              startIcon={<CenterFocusWeakIcon />}
+              size="medium"
+              sx={{
+                position: "absolute",
+                right: 0,
+                bottom: 0,
+                margin: 1.5
+              }}
+              component="label"
+            >
+              Cover
+              <input type="file" style={{ display: "none" }} accept="image/*" onChange={handleUploadCover} />
+            </Button>
+          }
         </Box>}
         <Box
           sx={{
@@ -209,7 +225,7 @@ function ModalCardDetail() {
           }}
         >
           <CreditCardIcon />
-          <LabelEditable inputFontSize="22px" value={currentActiveCard?.title} onChangedValue={handleTitleChange}></LabelEditable>
+          <LabelEditable disabled={!currentBoard.role} inputFontSize="22px" value={currentActiveCard.title} onChangedValue={handleTitleChange}></LabelEditable>
         </Box>
         <Grid container spacing={2} sx={{ mb: 3, px: 2 }}>
           <Grid xs={12} sm={9}>
@@ -255,7 +271,7 @@ function ModalCardDetail() {
                   Leave
                 </SidebarItem>
               ) : (
-                <SidebarItem className="active" onClick={() => { handleUpdateMembers(currentUser._id, CARD_MEMBERS_ACTION.JOIN) }}>
+                <SidebarItem className={currentBoard.role != null ? "active" : ""} onClick={() => { currentBoard.role != null && handleUpdateMembers(currentUser._id, CARD_MEMBERS_ACTION.JOIN) }}>
                   <PersonAddOutlinedIcon fontSize="small" />
                   Join
                 </SidebarItem>
@@ -276,10 +292,10 @@ function ModalCardDetail() {
                 <AttachmentOutlinedIcon fontSize="small" />
                 Attachment
               </SidebarItem>
-              <SidebarItem className={`active ${isUploading ? 'disabled' : ''}`} component="label">
+              <SidebarItem className={`${currentBoard.role != null ? "active" : ""} ${isUploading ? 'disabled' : ''}`} component="label">
                 <CenterFocusWeakIcon fontSize="small" />
                 Cover
-                <input type="file" style={{ display: "none" }} accept="image/*" onChange={handleUploadCover} />
+                <input disabled={!currentBoard.role} type="file" style={{ display: "none" }} accept="image/*" onChange={handleUploadCover} />
               </SidebarItem>
             </Stack>
             <Divider sx={{ my: 2 }} />

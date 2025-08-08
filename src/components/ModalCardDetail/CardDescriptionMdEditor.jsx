@@ -1,12 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useColorScheme } from '@mui/material/styles'
 import MDEditor from '@uiw/react-md-editor'
 import rehypeSanitize from 'rehype-sanitize'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import EditNoteIcon from '@mui/icons-material/EditNote'
-import { useDispatch } from 'react-redux'
-import { updateCurrentActiveCard } from '~/redux/slices/activeCardSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { updateDescriptionCurrentActiveCard } from '~/redux/slices/activeCardSlice'
 import { updateCardInBoard } from '~/redux/slices/boardSlice'
 import { updateCardDetailsAPI } from '~/apis'
 
@@ -15,11 +15,12 @@ function CardDescriptionMdEditor({ card }) {
   // Lấy giá trị 'dark', 'light' hoặc 'system' mode từ MUI để support phần Markdown bên dưới: data-color-mode={mode}
   // https://www.npmjs.com/package/@uiw/react-md-editor#support-dark-modenight-mode
   const { mode } = useColorScheme()
+  const role = useSelector(state => state.board.data.role)
 
   // State xử lý chế độ Edit và chế độ View
   const [markdownEditMode, setMarkdownEditMode] = useState(false)
   // State xử lý giá trị markdown khi chỉnh sửa
-  const [cardDescription, setCardDescription] = useState(card?.description|| "")
+  const [cardDescription, setCardDescription] = useState(card?.description || "")
   const dispatch = useDispatch()
 
   const updateCardDescription = async () => {
@@ -29,7 +30,12 @@ function CardDescriptionMdEditor({ card }) {
     }
     await updateCardDetailsAPI(card._id, { boardId: card.boardId, description: cardDescription })
     dispatch(updateCardInBoard({ ...card, description: cardDescription }))
+    dispatch(updateDescriptionCurrentActiveCard(cardDescription))
   }
+
+  useEffect(() => {
+    setCardDescription(card?.description || "")
+  }, [card?.description])
 
   return (
     <Box sx={{ mt: -4 }}>
@@ -42,7 +48,7 @@ function CardDescriptionMdEditor({ card }) {
               previewOptions={{ rehypePlugins: [[rehypeSanitize]] }} // https://www.npmjs.com/package/@uiw/react-md-editor#security
               height={400}
               preview="edit" // Có 3 giá trị để set tùy nhu cầu ['edit', 'live', 'preview']
-              // hideToolbar={true}
+            // hideToolbar={true}
             />
           </Box>
           <Button
@@ -64,6 +70,7 @@ function CardDescriptionMdEditor({ card }) {
             variant="contained"
             color="info"
             size="small"
+            disabled={!role}
             startIcon={<EditNoteIcon />}>
             Edit
           </Button>
@@ -73,7 +80,7 @@ function CardDescriptionMdEditor({ card }) {
               style={{
                 whiteSpace: 'pre-wrap',
                 padding: cardDescription ? '10px' : '0px',
-                border:  cardDescription ? '0.5px solid rgba(0, 0, 0, 0.2)' : 'none',
+                border: cardDescription ? '0.5px solid rgba(0, 0, 0, 0.2)' : 'none',
                 borderRadius: '8px'
               }}
             />

@@ -7,11 +7,12 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Box from '@mui/material/Box'
 import { Typography } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchBoard, selectBoard } from '~/redux/slices/boardSlice'
+import { fetchBoard, selectBoard, updateBoard } from '~/redux/slices/boardSlice'
 import { useParams } from 'react-router-dom'
 import ModalCardDetail from '~/components/ModalCardDetail/ModalCardDetail'
 import { useState } from 'react'
 import { selectCurrentActiveCard } from '~/redux/slices/activeCardSlice'
+import socket from '~/utils/socket'
 
 function Board() {
   const dispatch = useDispatch()
@@ -22,8 +23,25 @@ function Board() {
   useEffect(() => {
     setIsLoading(true)
     dispatch(fetchBoard(boardId)).then(() => {
+      socket.emit('c_joinBoard', boardId)
       setIsLoading(false)
     })
+
+    return () => {
+      socket.emit('c_leaveBoard', boardId)
+    }
+  }, [dispatch, boardId])
+
+  useEffect(() => {
+    socket.on('s_changeBoardData', (updatedBoard) => {
+      if (updatedBoard._id === boardId) {
+        dispatch(updateBoard(updatedBoard))
+      }
+    })
+
+    return () => {
+      socket.off('s_changeBoardData')
+    }
   }, [dispatch, boardId])
 
   if (isLoading || !board) {
@@ -33,19 +51,20 @@ function Board() {
         <Typography> Loading board...</Typography>
       </Box>
     )
-  } else {
-    return (
-      <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
-        <AppBar />
-        <BoardBar board={board} />
-        <BoardContent
-          board={board}
-        />
-        {currentActiveCard && currentActiveCard.boardId === boardId && <ModalCardDetail />}
-      </Container >
-    )
-
   }
+
+  return (
+    <Container disableGutters maxWidth={false} sx={{ height: '100vh' }} {...!board.role && { "data-no-dnd": "true" }}>
+      <AppBar />
+      <BoardBar board={board} />
+      <BoardContent
+        board={board}
+      />
+      {currentActiveCard && currentActiveCard.boardId === boardId && <ModalCardDetail />}
+    </Container >
+  )
+
+
 }
 
 export default Board

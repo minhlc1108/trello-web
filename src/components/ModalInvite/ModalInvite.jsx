@@ -57,16 +57,18 @@ const ModalInvite = () => {
   }, 1000)
   return (
     <>
-      <Button
-        variant="outlined"
-        startIcon={<PersonAddIcon />}
-        sx={{
-          color: 'white',
-          borderColor: 'white',
-          '&:hover': { borderColor: 'white' }
-        }}
-        onClick={() => setIsOpen(true)}
-      >Invite</Button>
+      {currentBoard.role !== null &&
+        <Button
+          variant="outlined"
+          startIcon={<PersonAddIcon />}
+          sx={{
+            color: 'white',
+            borderColor: 'white',
+            '&:hover': { borderColor: 'white' }
+          }}
+          onClick={() => setIsOpen(true)}
+        >Invite</Button>
+      }
       <Modal
         open={isOpen}
         onClose={handleCloseModal}
