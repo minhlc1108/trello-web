@@ -121,9 +121,10 @@ function ModalCardDetail() {
       res.members = members
       dispatch(updateCurrentActiveCard({ ...currentActiveCard, memberIds: res.memberIds, members: res.members }))
       dispatch(updateCardInBoard({ ...currentActiveCard, memberIds: res.memberIds, members: res.members }))
-      toast.success(`You ${action === CARD_MEMBERS_ACTION.JOIN ? 'joined' : 'left'} the card successfully!`)
       if (userId !== currentUser._id) {
         toast.info(`You ${action === CARD_MEMBERS_ACTION.JOIN ? 'added' : 'removed'} ${[...currentBoard.members, ...currentBoard.owners].find(m => m._id === userId)?.displayName} to the card!`)
+      } else {
+        toast.success(`You ${action === CARD_MEMBERS_ACTION.JOIN ? 'joined' : 'left'} the card successfully!`)
       }
     }
   }

@@ -1,13 +1,17 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import Typography from '@mui/material/Typography'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/slices/userSlice'
-import { selectBoard } from '~/redux/slices/boardSlice'
+import { selectBoard, updateMembers } from '~/redux/slices/boardSlice'
+import { BOARD_ROLES } from '~/utils/constants'
+import { useConfirm } from 'material-ui-confirm'
+import { changeRoleAPI, leaveBoardAPI, removeMemberAPI } from '~/apis'
+import { useNavigate } from 'react-router-dom'
 
 function SelectRole({ role, _id }) {
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -15,6 +19,9 @@ function SelectRole({ role, _id }) {
   const currentUser = useSelector(selectCurrentUser)
   const currentBoard = useSelector(selectBoard)
   const open = Boolean(anchorEl)
+  const confirm = useConfirm()
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget)
   }
@@ -23,9 +30,62 @@ function SelectRole({ role, _id }) {
     setAnchorEl(null)
   }
 
-  const isMember = currentBoard.members.some(user => user._id === currentUser._id)
-  const isAdmin = currentBoard.owners.some(user => user._id === _id)
-  const isLastAdmin = currentBoard.owners.length === 1 && currentBoard.owners[0]._id === _id
+  const isMember = currentBoard.memberIds.includes(currentUser._id)
+  const isAdmin = currentBoard.ownerIds.includes(currentUser._id)
+  const isLastAdmin = currentBoard.ownerIds.length === 1 && currentBoard.ownerIds[0] === _id
+
+  const handleChooseAdmin = async () => {
+    if (selectedRole === BOARD_ROLES.ADMIN) {
+      handleClose();
+      return;
+    }
+    if (currentBoard.ownerIds.includes(_id)) {
+      handleClose();
+      return;
+    }
+    await changeRoleAPI(currentBoard._id, _id, BOARD_ROLES.ADMIN)
+    setSelectedRole(BOARD_ROLES.ADMIN);
+    dispatch(updateMembers({ role: BOARD_ROLES.ADMIN, userId: _id }))
+    handleClose();
+  }
+
+  const handleChooseMember = async () => {
+    if (selectedRole === BOARD_ROLES.MEMBER) {
+      handleClose();
+      return;
+    }
+
+    await changeRoleAPI(currentBoard._id, _id, BOARD_ROLES.MEMBER)
+    dispatch(updateMembers({ role: BOARD_ROLES.MEMBER, userId: _id }))
+    setSelectedRole(BOARD_ROLES.MEMBER);
+    handleClose();
+  }
+
+  const handleLeaveBoard = () => {
+    confirm({
+      confirmationText: 'Yes',
+      title: 'Leave board',
+      description: 'Are you sure?'
+    }).then(async () => {
+      await leaveBoardAPI(currentBoard._id)
+      dispatch(updateMembers({ role: null, userId: _id }))
+      navigate('/boards')
+      handleClose();
+    }).catch()
+
+  }
+
+  const handleRemoveMember = () => {
+    confirm({
+      confirmationText: 'Yes',
+      title: 'Remove member from board',
+      description: 'Are you sure?'
+    }).then(async () => {
+      await removeMemberAPI(currentBoard._id, _id)
+      dispatch(updateMembers({ role: null, userId: _id }))
+      handleClose();
+    }).catch()
+  }
 
   return (
     <Box>
@@ -36,22 +96,22 @@ function SelectRole({ role, _id }) {
         onClick={handleClick}
         endIcon={<ExpandMoreIcon />}
       >
-        {selectedRole === 'admin' ? 'Admin' : selectedRole === 'member' ? 'Member' : ''}
+        {selectedRole === BOARD_ROLES.ADMIN ? 'Admin' : selectedRole === BOARD_ROLES.MEMBER ? 'Member' : ''}
       </Button>
       <Menu
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
       >
-        <MenuItem disabled={isMember} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }} onClick={() => { setSelectedRole('admin'); handleClose(); }}>
+        <MenuItem disabled={isMember} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }} onClick={() => { handleChooseAdmin() }}>
           <Typography variant='p'>Admin</Typography>
         </MenuItem>
-        <MenuItem disabled={isMember || isLastAdmin} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }} onClick={() => { setSelectedRole('member'); handleClose(); }}>
+        <MenuItem disabled={isMember || isLastAdmin} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }} onClick={() => { handleChooseMember() }}>
           <Typography variant='p'>Member</Typography>
           {isLastAdmin && <span style={{ fontSize: '12px', color: 'gray' }}>Board must have at least one admin.</span>}
         </MenuItem>
         {currentUser._id === _id && (
-          <MenuItem disabled={isLastAdmin} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }} onClick={() => { setSelectedRole('leave'); handleClose(); }}>
+          <MenuItem disabled={isLastAdmin} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }} onClick={() => { handleLeaveBoard() }}>
             <Typography variant='p'>Leave</Typography>
             {isLastAdmin && <span style={{ fontSize: '12px', color: 'gray' }}>Board must have at least one admin.</span>}
           </MenuItem>
@@ -59,7 +119,7 @@ function SelectRole({ role, _id }) {
         }
         {
           currentUser._id !== _id && isAdmin && (
-            <MenuItem sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }} onClick={() => { setSelectedRole('leave'); handleClose(); }}>
+            <MenuItem sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }} onClick={() => { handleRemoveMember() }}>
               <Typography variant='p'>Remove</Typography>
             </MenuItem>
           )
