@@ -10,11 +10,12 @@ import { selectCurrentUser } from '~/redux/slices/userSlice'
 import { Button } from '@mui/material'
 import { useState } from 'react'
 import { updateCardDetailsAPI } from '~/apis'
-import { updateCurrentActiveCard } from '~/redux/slices/activeCardSlice'
+import { updateCommentCurrentActiveCard } from '~/redux/slices/activeCardSlice'
 import { updateCardInBoard } from '~/redux/slices/boardSlice'
 
 function CardActivitySection({ card }) {
   const currentUser = useSelector(selectCurrentUser)
+  const role = useSelector(state => state.board.data.role)
   const [content, setContent] = useState("")
   const dispatch = useDispatch()
   const handleAddCardComment = async (event) => {
@@ -32,8 +33,8 @@ function CardActivitySection({ card }) {
       userDisplayName: currentUser?.displayName,
       content: content.trim()
     }
-    const cardUpdated = await updateCardDetailsAPI(card._id, {boardId: card.boardId, incomingComment: commentToAdd })
-    dispatch(updateCurrentActiveCard({ ...card, comments: [...cardUpdated.comments].reverse() }))
+    const cardUpdated = await updateCardDetailsAPI(card._id, { boardId: card.boardId, incomingComment: commentToAdd })
+    dispatch(updateCommentCurrentActiveCard([...cardUpdated.comments].reverse()))
     dispatch(updateCardInBoard({ ...card, comments: [...cardUpdated.comments].reverse() }))
     setContent("") // Reset lại giá trị content sau khi gửi comment
   }
@@ -41,26 +42,28 @@ function CardActivitySection({ card }) {
   return (
     <Box sx={{ mt: 2 }}>
       {/* Xử lý thêm comment vào Card */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <Avatar
-          sx={{ width: 36, height: 36, cursor: 'pointer' }}
-          alt="trungquandev"
-          src={currentUser?.avatar}
-        />
-        <TextField
-          fullWidth
-          placeholder="Write a comment..."
-          type="text"
-          variant="outlined"
-          multiline
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          onKeyDown={handleAddCardComment}
-        />
-        {content && <Button variant="contained" color="primary" onClick={handleSendComment}>
-          Send
-        </Button>}
-      </Box>
+      {role !== null &&
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <Avatar
+            sx={{ width: 36, height: 36, cursor: 'pointer' }}
+            alt="trungquandev"
+            src={currentUser?.avatar}
+          />
+          <TextField
+            fullWidth
+            placeholder="Write a comment..."
+            type="text"
+            variant="outlined"
+            multiline
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            onKeyDown={handleAddCardComment}
+          />
+          {content && <Button variant="contained" color="primary" onClick={handleSendComment}>
+            Send
+          </Button>}
+        </Box>
+      }
 
       {/* Hiển thị danh sách các comments */}
       {card?.comments?.length === 0 &&

@@ -5,6 +5,7 @@ import { isEmpty } from 'lodash'
 import { mapOrder } from '~/utils/sorts'
 import { generatePlaceholderCard } from '~/utils/formatter'
 import { BOARD_ROLES } from '~/utils/constants'
+import socket from '~/utils/socket'
 
 export const fetchBoard = createAsyncThunk('boards/fetchBoard', async (boardId) => {
   return await fetchBoardDetailsAPI(boardId)
@@ -16,6 +17,11 @@ export const boardSlice = createSlice({
     data: null
   },
   reducers: {
+    updateBoard: (state, action) => {
+      const updatedBoard = action.payload
+      updatedBoard.role = state.data.role
+      state.data = updatedBoard
+    },
     addColumn: (state, action) => {
       const column = action.payload
       // tạo mới column chưa có card tạo placehoder card
@@ -24,17 +30,21 @@ export const boardSlice = createSlice({
 
       state.data.columns.push(column)
       state.data.columnOrderIds.push(column._id)
+      socket.emit('c_changeBoardData', state.data)
     },
     moveColumn: (state, action) => {
       state.data.columns = action.payload.columns
       state.data.columnOrderIds = action.payload.columnOrderIds
+      socket.emit('c_changeBoardData', state.data)
     },
     deleteColumn: (state, action) => {
       state.data.columns = state.data.columns.filter(c => c._id !== action.payload)
       state.data.columnOrderIds = state.data.columnOrderIds.filter(c => c._id !== action.payload)
+      socket.emit('c_changeBoardData', state.data)
     },
     updateColumns: (state, action) => {
       state.data.columns = action.payload
+      socket.emit('c_changeBoardData', state.data)
     },
     addCard: (state, action) => {
       const createdCard = action.payload
@@ -48,6 +58,7 @@ export const boardSlice = createSlice({
         columnToUpdate.cards.push(createdCard)
         columnToUpdate.cardOrderIds.push(createdCard._id)
       }
+      socket.emit('c_changeBoardData', state.data)
     },
     updateCardInBoard: (state, action) => {
       const incomingCard = action.payload
@@ -63,6 +74,7 @@ export const boardSlice = createSlice({
           })
         }
       }
+      socket.emit('c_changeBoardData', state.data)
     },
     updateMembers: (state, action) => {
       const { role, userId } = action.payload
@@ -98,6 +110,7 @@ export const boardSlice = createSlice({
           state.data.ownerIds = state.data.ownerIds.filter(id => id !== userId)
           break;
       }
+      socket.emit('c_changeBoardData', state.data)
     }
   },
   extraReducers: (builder) => {
@@ -132,7 +145,7 @@ export const boardSlice = createSlice({
   }
 })
 
-export const { addColumn, moveColumn, addCard, updateColumns, deleteColumn, updateCardInBoard, updateMembers } = boardSlice.actions
+export const { updateBoard, addColumn, moveColumn, addCard, updateColumns, deleteColumn, updateCardInBoard, updateMembers } = boardSlice.actions
 
 export const selectBoard = (state) => {
   return state.board.data

@@ -22,6 +22,11 @@ function SelectRole({ role, _id }) {
   const confirm = useConfirm()
   const dispatch = useDispatch()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    setSelectedRole(role)
+  }, [role])
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget)
   }
@@ -69,6 +74,7 @@ function SelectRole({ role, _id }) {
     }).then(async () => {
       await leaveBoardAPI(currentBoard._id)
       dispatch(updateMembers({ role: null, userId: _id }))
+
       navigate('/boards')
       handleClose();
     }).catch()

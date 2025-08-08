@@ -25,11 +25,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import { addNotification, fetchNotifications } from '~/redux/slices/notificationSlice'
 import socket from '~/utils/socket'
 import { selectCurrentUser } from '~/redux/slices/userSlice'
+import AppBarSearch from '~/components/AppBarSearch/AppBarSearch'
 
 function AppBar() {
   const [openModal, setOpenModal] = useState(false)
   const currentUser = useSelector(selectCurrentUser)
-  const [searchValue, setSearchValue] = useState('')
   const [newNotif, setNewNotif] = useState(false)
   const dispatch = useDispatch()
 
@@ -74,42 +74,9 @@ function AppBar() {
         <ModalCreateBoard open={openModal} handleClose={() => setOpenModal(false)} />
       </Box>
 
+
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <TextField
-          id="outlined-search"
-          label="Search..."
-          type="text"
-          value={searchValue}
-          size='small'
-          onChange={(e) => setSearchValue(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position='start'>
-                <SearchIcon sx={{ color: 'white' }} />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position='end'>
-                <CloseIcon fontSize='small'
-                  sx={{ color: 'white', cursor: 'pointer', display: searchValue ? 'block' : 'none' }}
-                  onClick={() => setSearchValue('')}
-                />
-              </InputAdornment>
-            )
-          }}
-          sx={{
-            minWidth: '120px',
-            maxWidth: '180px',
-            '& label': { color: 'white' },
-            '& input': { color: 'white' },
-            '& label.Mui-focused': { color: 'white' },
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': { borderColor: 'white' },
-              '&:hover fieldset': { borderColor: 'white' },
-              '&.Mui-focused fieldset': { borderColor: 'white' }
-            }
-          }}
-        />
+        <AppBarSearch />
         <ModeSelect />
         <Notification newNotif={newNotif} setNewNotif={setNewNotif} />
         <Tooltip title="Help">
@@ -118,7 +85,7 @@ function AppBar() {
         <Profiles />
       </Box>
 
-    </Box>
+    </Box >
   )
 }
 

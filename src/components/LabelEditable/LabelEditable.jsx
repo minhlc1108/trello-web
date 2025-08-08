@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import TextField from '@mui/material/TextField'
 
 function LabelEditable({ value, onChangedValue, inputFontSize = '16px', ...props }) {
@@ -10,7 +10,9 @@ function LabelEditable({ value, onChangedValue, inputFontSize = '16px', ...props
     }
     onChangedValue(inputValue)
   }
-
+  useEffect(() => {
+    setInputValue(value)
+  }, [value])
   return (
     <TextField
       inputRef={inputRef}
