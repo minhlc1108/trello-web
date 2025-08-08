@@ -62,6 +62,21 @@ export const moveCardToDifferenceColumnAPI = async (updateData) => {
   return respone.data
 }
 
+export const changeRoleAPI = async (boardId, userId, role) => {
+  const respone = await axiosInstance.put(`${API_ROOT}/v1/boards/changeRole/${boardId}`, { userId, role })
+  return respone.data
+}
+
+export const leaveBoardAPI = async (boardId) => {
+  const respone = await axiosInstance.put(`${API_ROOT}/v1/boards/leaveBoard/${boardId}`)
+  return respone.data
+}
+
+export const removeMemberAPI = async (boardId, userId) => {
+  const respone = await axiosInstance.put(`${API_ROOT}/v1/boards/removeMember/${boardId}`, { userId })
+  return respone.data
+}
+
 // Column API
 export const createNewColumnAPI = async (newColumnData) => {
   const respone = await axiosInstance.post(`${API_ROOT}/v1/columns`, newColumnData)
@@ -138,3 +153,17 @@ export const inviteMemberToBoardAPI = async (data) => {
   return respone.data
 }
 
+export const getInvitesAPI = async () => {
+  const respone = await axiosInstance.get(`${API_ROOT}/v1/invites/board`)
+  return respone.data
+}
+
+export const updateInviteStatusAPI = async (inviteId, data) => {
+  const respone = await axiosInstance.put(`${API_ROOT}/v1/invites/${inviteId}`, data)
+  return respone.data
+}
+
+export const deleteInviteAPI = async (inviteId) => {
+  const respone = await axiosInstance.delete(`${API_ROOT}/v1/invites/${inviteId}`)
+  return respone.data
+}

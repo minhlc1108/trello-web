@@ -1,8 +1,10 @@
+/* eslint-disable indent */
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { fetchBoardDetailsAPI } from '~/apis'
 import { isEmpty } from 'lodash'
 import { mapOrder } from '~/utils/sorts'
 import { generatePlaceholderCard } from '~/utils/formatter'
+import { BOARD_ROLES } from '~/utils/constants'
 
 export const fetchBoard = createAsyncThunk('boards/fetchBoard', async (boardId) => {
   return await fetchBoardDetailsAPI(boardId)
@@ -61,7 +63,41 @@ export const boardSlice = createSlice({
           })
         }
       }
+    },
+    updateMembers: (state, action) => {
+      const { role, userId } = action.payload
+      switch (role) {
+        case BOARD_ROLES.ADMIN: {
+          // nếu role là admin chuyển thành member
+          const user = state.data.members.find(member => member._id === userId)
+          if (user) {
+            state.data.members = state.data.members.filter(member => member._id !== userId)
+            state.data.memberIds = state.data.memberIds.filter(id => id !== userId)
+            state.data.owners.push(user)
+            state.data.ownerIds.push(user._id)
+          }
+          break;
+        }
+        case BOARD_ROLES.MEMBER: {
+          // nếu role là admin chuyển thành member
+          const user = state.data.owners.find(owner => owner._id === userId)
+          if (user) {
+            state.data.owners = state.data.owners.filter(owner => owner._id !== userId)
+            state.data.ownerIds = state.data.ownerIds.filter(id => id !== userId)
+            state.data.members.push(user)
+            state.data.memberIds.push(user._id)
+          }
 
+          break;
+        }
+        default:
+          // nếu role là null thì xóa user khỏi board
+          state.data.members = state.data.members.filter(member => member._id !== userId)
+          state.data.owners = state.data.owners.filter(owner => owner._id !== userId)
+          state.data.memberIds = state.data.memberIds.filter(id => id !== userId)
+          state.data.ownerIds = state.data.ownerIds.filter(id => id !== userId)
+          break;
+      }
     }
   },
   extraReducers: (builder) => {
@@ -96,7 +132,7 @@ export const boardSlice = createSlice({
   }
 })
 
-export const { addColumn, moveColumn, addCard, updateColumns, deleteColumn, updateCardInBoard } = boardSlice.actions
+export const { addColumn, moveColumn, addCard, updateColumns, deleteColumn, updateCardInBoard, updateMembers } = boardSlice.actions
 
 export const selectBoard = (state) => {
   return state.board.data

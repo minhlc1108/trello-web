@@ -3,21 +3,20 @@ import { useEffect, useState } from 'react'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import CloseIcon from "@mui/icons-material/Close";
 import SelectRole from './SelectRole';
-import useDebounce from '~/hooks/useDebounce';
+import { useDebounce } from '~/hooks/useDebounce';
 import { inviteMemberToBoardAPI, searchUserAPI } from '~/apis';
 import { useSelector } from 'react-redux';
 import { selectBoard } from '~/redux/slices/boardSlice';
 import { selectCurrentUser } from '~/redux/slices/userSlice';
-import { set } from 'lodash';
 import { toast } from 'react-toastify';
-
+import { BOARD_ROLES } from '~/utils/constants';
+import socket from '~/utils/socket';
 
 const ModalInvite = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const [searchValue, setSearchValue] = useState('')
-  const debounceSearchValue = useDebounce(searchValue, 1000)
   const [inviteeMembers, setInviteeMembers] = useState([])
-  const [result, setResult] = useState([])
+  const [result, setResult] = useState(null)
+  const [isOpenSearch, setIsOpenSearch] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isInviting, setIsInviting] = useState(false)
   const currentBoard = useSelector(selectBoard)
@@ -29,7 +28,10 @@ const ModalInvite = () => {
   const handleInvite = async () => {
     setIsInviting(true)
     const inviteeIds = inviteeMembers.map(member => member._id)
-    await inviteMemberToBoardAPI({ boardId: currentBoard._id, inviteeIds }).finally(() => {
+    inviteMemberToBoardAPI({ boardId: currentBoard._id, inviteeIds }).then((res) => {
+      const invitations = res.filter(invite => invite.status === 201).map(invite => (invite.data))
+      socket.emit('c_receiveInvites', invitations)
+    }).finally(() => {
       setIsInviting(false)
     })
     setInviteeMembers([])
@@ -37,18 +39,22 @@ const ModalInvite = () => {
   }
 
   useEffect(() => {
-    if (debounceSearchValue && debounceSearchValue.trim() !== '') {
+    if (!isOpenSearch) setResult(null)
+  }, [isOpenSearch])
+
+  const debounceSearchValue = useDebounce((event) => {
+    const searchValue = event.target.value
+    if (searchValue && searchValue.trim() !== '') {
       setIsLoading(true)
-      searchUserAPI(debounceSearchValue.trim()).then((data) => {
+      searchUserAPI(searchValue.trim()).then((data) => {
         setResult(data)
       }).finally(() => {
         setIsLoading(false)
       })
     } else {
-      setResult([])
+      setResult(null)
     }
-
-  }, [debounceSearchValue])
+  }, 1000)
   return (
     <>
       <Button
@@ -111,21 +117,18 @@ const ModalInvite = () => {
             <Autocomplete
               multiple
               limitTags={5}
-              freeSolo={searchValue ? false : true}
+              open={isOpenSearch}
+              onClose={() => setIsOpenSearch(false)}
+              onOpen={() => setIsOpenSearch(true)}
               value={inviteeMembers}
               onChange={(event, newValue) => {
                 setInviteeMembers(newValue);
               }}
               renderInput={(params) =>
-                <TextField {...params} placeholder="Enter email to invite" value={searchValue}
-                  onChange={(e) => {
-                    setSearchValue(e.target.value)
-                    if (!isLoading && e.target.value.trim() === '') {
-                      setIsLoading(true)
-                    }
-                  }}
-                />}
-              options={result}
+                <TextField {...params} placeholder="Enter email to invite" onChange={debounceSearchValue}
+                />
+              }
+              options={result || []}
               isOptionEqualToValue={(option, value) => option._id === value._id}
               getOptionLabel={(option) => option.email}
               getOptionDisabled={(option) =>
@@ -133,13 +136,13 @@ const ModalInvite = () => {
                   (member) => member._id === option._id
                 )
               }
-              noOptionsText="No users found"
+              noOptionsText={!result ? "Type email to invite" : "No users found"}
               sx={{ flex: 1 }}
-              loading={isLoading && searchValue.trim() !== ''}
+              loading={isLoading}
               renderOption={(props, option) => {
-                const { onClick: handleOptionClick, ...optionProps } = props;
+                const { ...optionProps } = props;
                 return (
-                  <li {...optionProps} key={option._id} onClick={(e) => { setSearchValue(""); handleOptionClick(e); }}>
+                  <li {...optionProps} key={option._id} >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Avatar
                         src={option.avatar}
@@ -169,7 +172,7 @@ const ModalInvite = () => {
               Members
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2 }}>
+              {[...currentBoard.ownerIds, ...currentBoard.memberIds].includes(currentUser._id) && <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Avatar
                     src={currentUser.avatar}
@@ -182,9 +185,9 @@ const ModalInvite = () => {
                   </Box>
                 </Box>
 
-                <SelectRole _id={currentUser._id} role={currentBoard.owners.some(user => user._id === currentUser._id) ? "admin" : "member"} />
+                <SelectRole _id={currentUser._id} role={currentBoard.owners.some(user => user._id === currentUser._id) ? BOARD_ROLES.ADMIN : BOARD_ROLES.MEMBER} />
               </Box>
-
+              }
 
               {[...currentBoard.owners, ...currentBoard.members].filter(member => member._id !== currentUser._id).map((member) => (
                 <Box key={member._id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2 }}>
@@ -200,7 +203,7 @@ const ModalInvite = () => {
                     </Box>
                   </Box>
 
-                  <SelectRole _id={member._id} role={currentBoard.owners.some(user => user._id === member._id) ? "admin" : "member"} />
+                  <SelectRole _id={member._id} role={currentBoard.owners.some(user => user._id === member._id) ? BOARD_ROLES.ADMIN : BOARD_ROLES.MEMBER} />
                 </Box>
               ))}
             </Box>

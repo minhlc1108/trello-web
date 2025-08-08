@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Box from '@mui/system/Box'
 import ModeSelect from '~/components/ModeSelect/ModeSelect'
 import AppsIcon from '@mui/icons-material/Apps'
@@ -11,8 +11,6 @@ import Starred from './Menus/Starred'
 import Templates from './Menus/Templates'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
-import Badge from '@mui/material/Badge'
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
 import Tooltip from '@mui/material/Tooltip'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import Profiles from './Menus/Profiles'
@@ -22,10 +20,30 @@ import CloseIcon from '@mui/icons-material/Close'
 import InputAdornment from '@mui/material/InputAdornment'
 import { Link } from 'react-router-dom'
 import ModalCreateBoard from '~/components/ModalCreateBoard/ModalCreateBoard'
+import Notification from '~/components/Notification/Notification'
+import { useDispatch, useSelector } from 'react-redux'
+import { addNotification, fetchNotifications } from '~/redux/slices/notificationSlice'
+import socket from '~/utils/socket'
+import { selectCurrentUser } from '~/redux/slices/userSlice'
 
 function AppBar() {
   const [openModal, setOpenModal] = useState(false)
+  const currentUser = useSelector(selectCurrentUser)
   const [searchValue, setSearchValue] = useState('')
+  const [newNotif, setNewNotif] = useState(false)
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    dispatch(fetchNotifications())
+    socket.on('s_receiveInvites', (invitations) => {
+      const invitation = invitations.find(invite => invite.inviteeId === currentUser._id)
+      if (invitation) {
+        dispatch(addNotification(invitation))
+        setNewNotif(true)
+      }
+    })
+
+  }, [dispatch, currentUser])
   return (
     <Box sx={{
       width: '100%',
@@ -93,11 +111,7 @@ function AppBar() {
           }}
         />
         <ModeSelect />
-        <Tooltip title="Notifications">
-          <Badge color="warning" variant="dot" sx={{ cursor: 'pointer' }}>
-            <NotificationsNoneIcon sx={{ color: 'white' }} />
-          </Badge>
-        </Tooltip>
+        <Notification newNotif={newNotif} setNewNotif={setNewNotif} />
         <Tooltip title="Help">
           <HelpOutlineIcon sx={{ cursor: 'pointer', color: 'white' }} />
         </Tooltip>
