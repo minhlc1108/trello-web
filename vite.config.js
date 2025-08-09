@@ -15,6 +15,6 @@ export default defineConfig({
     alias: [
       { find: '~', replacement: '/src' }
     ]
-  }
-  // base: './'
+  },
+  base: './'
 })
