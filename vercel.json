@@ -1,8 +1,18 @@
- {
-      "rewrites": [
-        {
-          "source": "/(.*)",
-          "destination": "/index.html"
-        }
-      ]
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index"
+    }
+  ],
+  "regions": [
+    "iad1"
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  }
 }
