@@ -1,5 +1,8 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    {
+      "source": "/((?!static|favicon\\.ico|.*\\..+).*)",
+      "destination": "/index.html"
+    }
   ]
 }
