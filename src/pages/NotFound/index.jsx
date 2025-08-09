@@ -15,7 +15,7 @@ function PageNotFound() {
       }}
     >
       <Typography variant="h1" sx={{
-        fontWeight: 700, background: 'url(/src/assets/textbg.jpg)',
+        fontWeight: 700, background: 'url(/textbg.jpg)',
         backgroundSize: 'cover',
         WebkitTextFillColor: 'transparent',
         WebkitBackgroundClip: 'text',

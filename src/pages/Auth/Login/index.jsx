@@ -53,7 +53,7 @@ function Login() {
         position: 'absolute',
         width: '100%',
         height: '100%',
-        backgroundImage: 'url("/src/assets/background.jpg")',
+        backgroundImage: 'url("/background.jpg")',
         backgroundRepeat: 'no-repeat',
         backgroundSize: 'cover'
       }}>

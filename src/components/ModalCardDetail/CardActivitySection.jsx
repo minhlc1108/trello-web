@@ -7,7 +7,7 @@ import Tooltip from '@mui/material/Tooltip'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/slices/userSlice'
-import { Button } from '@mui/material'
+import { Button, CircularProgress } from '@mui/material'
 import { useState } from 'react'
 import { updateCardDetailsAPI } from '~/apis'
 import { updateCommentCurrentActiveCard } from '~/redux/slices/activeCardSlice'
@@ -17,6 +17,7 @@ function CardActivitySection({ card }) {
   const currentUser = useSelector(selectCurrentUser)
   const role = useSelector(state => state.board.data.role)
   const [content, setContent] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const dispatch = useDispatch()
   const handleAddCardComment = async (event) => {
     // Bắt hành động người dùng nhấn phím Enter && không phải hành động Shift + Enter
@@ -27,6 +28,7 @@ function CardActivitySection({ card }) {
   }
 
   const handleSendComment = async () => {
+    setIsLoading(true)
     if (!content) return // Nếu không có giá trị gì thì return không làm gì cả
     const commentToAdd = {
       userAvatar: currentUser?.avatar,
@@ -37,6 +39,7 @@ function CardActivitySection({ card }) {
     dispatch(updateCommentCurrentActiveCard([...cardUpdated.comments].reverse()))
     dispatch(updateCardInBoard({ ...card, comments: [...cardUpdated.comments].reverse() }))
     setContent("") // Reset lại giá trị content sau khi gửi comment
+    setIsLoading(false)
   }
 
   return (
@@ -59,8 +62,8 @@ function CardActivitySection({ card }) {
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleAddCardComment}
           />
-          {content && <Button variant="contained" color="primary" onClick={handleSendComment}>
-            Send
+          {content && <Button variant="contained" disabled={isLoading} className='interceptor-loading' color="primary" onClick={handleSendComment}>
+            {isLoading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : 'Send'}
           </Button>}
         </Box>
       }
