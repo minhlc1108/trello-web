@@ -1,5 +1,9 @@
 {
-   "rewrites": [
+   "rewrites": [  
+    {
+      "source": "/api/(.*)",
+      "destination": "https://trello-api-8779.onrender.com/$1"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
