@@ -37,7 +37,7 @@ function CardUserGroup({ members, handleUpdateMembers }) {
         </Tooltip>
       ))}
       {role !== null && (
-        <Tooltip Tooltip title="Add new member">
+        <Tooltip title="Add new member">
           <Box
             sx={{
               width: 36,
@@ -74,7 +74,7 @@ function CardUserGroup({ members, handleUpdateMembers }) {
       >
         <Box sx={{ p: 2, maxWidth: '260px', display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
           {[...board.owners, ...board.members].map((member, index) =>
-            <Tooltip title={member.name} key={index}>
+            <Tooltip title={member?.name} key={index}>
               {/* Cách làm Avatar kèm badge icon: https://mui.com/material-ui/react-avatar/#with-badge */}
               <Badge
                 sx={{ cursor: 'pointer' }}
